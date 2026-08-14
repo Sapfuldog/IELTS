@@ -8,6 +8,7 @@ from aiogram.types import CallbackQuery, Message
 
 from app import keyboards as kb
 from app.db import Database
+from app.formatting import esc, spoiler
 from app.services import content
 from app.states import Vocab
 
@@ -34,7 +35,7 @@ async def start_set(call: CallbackQuery, state: FSMContext) -> None:
         return
     await state.set_state(Vocab.reviewing)
     await state.update_data(set_id=set_id, index=0)
-    await call.message.answer(f"🔤 <b>{vset['topic']}</b>")
+    await call.message.answer(f"🔤 <b>{esc(vset['topic'])}</b>")
     await _show_card(call.message, state, reveal=False)
 
 
@@ -44,9 +45,12 @@ async def _show_card(message: Message, state: FSMContext, reveal: bool) -> None:
     cards = vset["cards"]
     idx = data["index"]
     card = cards[idx]
-    text = f"🃏 <b>{idx + 1}/{len(cards)}</b>\n\n<b>{card['word']}</b>"
+    text = f"🃏 <b>{idx + 1}/{len(cards)}</b>\n\n<b>{esc(card['word'])}</b>"
+    # Translation stays hidden: guess first, then tap to check.
+    if card.get("translation"):
+        text += f"\n🇷🇺 {spoiler(card['translation'])}"
     if reveal:
-        text += f"\n\n<i>{card['definition']}</i>\n\n💬 {card['example']}"
+        text += f"\n\n<i>{esc(card['definition'])}</i>\n\n💬 {esc(card['example'])}"
     await message.answer(text, reply_markup=kb.vocab_nav())
 
 
@@ -74,7 +78,7 @@ async def next_card(call: CallbackQuery, state: FSMContext, db: Database) -> Non
         )
         await state.clear()
         await call.message.answer(
-            f"✅ Reviewed all {len(cards)} cards in <b>{vset['topic']}</b>. "
+            f"✅ Reviewed all {len(cards)} cards in <b>{esc(vset['topic'])}</b>. "
             "Come back tomorrow to reinforce them!",
             reply_markup=kb.main_menu(),
         )

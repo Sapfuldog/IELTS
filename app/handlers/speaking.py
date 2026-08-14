@@ -8,6 +8,7 @@ from aiogram.types import CallbackQuery, Message
 
 from app import keyboards as kb
 from app.db import Database
+from app.formatting import esc, spoiler, translation_block
 from app.services import content
 from app.states import Speaking
 
@@ -37,11 +38,14 @@ async def start_speaking(call: CallbackQuery, state: FSMContext) -> None:
     await state.update_data(exercise_id=exercise_id, q_index=0)
 
     await call.message.answer(
-        f"🗣 <b>Part {exercise['part']}: {exercise['topic']}</b>\n\n"
-        f"<i>{exercise['intro']}</i>"
+        f"🗣 <b>Part {exercise['part']}: {esc(exercise['topic'])}</b>\n\n"
+        f"<i>{esc(exercise['intro'])}</i>"
     )
     if exercise.get("cue_card"):
-        await call.message.answer(f"🃏 <b>Cue card</b>\n\n{exercise['cue_card']}")
+        text = f"🃏 <b>Cue card</b>\n\n{esc(exercise['cue_card'])}"
+        if exercise.get("cue_card_translation"):
+            text += f"\n\n{translation_block(exercise['cue_card_translation'])}"
+        await call.message.answer(text)
 
     await _send_question(call.message, state)
 
@@ -52,8 +56,12 @@ async def _send_question(message: Message, state: FSMContext) -> None:
     idx = data["q_index"]
     total = len(exercise["questions"])
     q = exercise["questions"][idx]
+    text = f"❓ <b>{idx + 1}/{total}</b>\n\n{esc(q)}"
+    translations = exercise.get("questions_translation") or []
+    if idx < len(translations):
+        text += f"\n🇷🇺 {spoiler(translations[idx])}"
     await message.answer(
-        f"❓ <b>{idx + 1}/{total}</b>\n\n{q}\n\n"
+        f"{text}\n\n"
         "🎙 Reply with a <b>voice message</b> (best practice) or type your answer."
     )
 
@@ -81,7 +89,7 @@ async def receive_answer(message: Message, state: FSMContext, db: Database) -> N
         return
 
     # Finished the set → deliver tips and close out.
-    tips = "\n".join(f"• {t}" for t in exercise.get("tips", []))
+    tips = "\n".join(f"• {esc(t)}" for t in exercise.get("tips", []))
     await db.save_result(
         user_id=message.chat.id,
         section="speaking",

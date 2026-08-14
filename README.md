@@ -23,6 +23,12 @@ command: `/reading`, `/listening`, `/writing`, `/speaking`, `/vocabulary`,
 `/progress`, plus `/start`, `/help` and `/cancel`. Commands work even in the
 middle of an exercise.
 
+**Russian translations, hidden behind spoilers.** Every passage, listening
+script, writing prompt, speaking question and vocabulary card carries a
+translation wrapped in `<tg-spoiler>`, so it is there when you are stuck but
+never spoils the exercise — you tap to reveal it. Listening scripts are hidden
+the same way, since showing them outright would hand over the answers.
+
 ## Quick start
 
 ```bash
@@ -163,6 +169,15 @@ A question object looks like this:
 { "type": "ynng", "q": "…", "answer": "NO", "explanation": "…" }
 { "type": "gap",  "q": "…", "answer": "45", "accept": ["forty-five"], "explanation": "…" }
 ```
+
+Translations are optional per item and validated when present:
+
+| Section | Field |
+|---|---|
+| reading / listening | `translation` (of the passage or script) |
+| writing | `translation` (of the prompt) |
+| speaking | `questions_translation` (list, same length as `questions`), `cue_card_translation` |
+| vocabulary | `translation` on each card |
 
 Run `python scripts/validate_content.py` after editing — it catches out-of-range
 answer indexes, illegal labels, duplicate ids and missing explanations.

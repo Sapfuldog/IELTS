@@ -14,6 +14,12 @@
       "Give reasons and small details, do not answer with just 'yes' or 'no'.",
       "Use a range of tenses: present for facts, past for changes, future for plans.",
       "Useful phrases: 'What I love about it is...', 'It's known for...'."
+    ],
+    "questions_translation": [
+      "Где находится ваш родной город и какой он?",
+      "Что вам нравится в нём больше всего?",
+      "Сильно ли ваш город изменился за последние годы?",
+      "Хотели бы вы жить там в будущем? Почему да или нет?"
     ]
   },
   {
@@ -29,7 +35,11 @@
       "Spend your one minute making quick notes for each bullet point.",
       "Cover every bullet — that structures your two minutes for you.",
       "Keep talking; hesitation is fine, silence is not. Use fillers like 'Let me think...'."
-    ]
+    ],
+    "questions_translation": [
+      "Запишите голосовое на 1–2 минуты с описанием навыка по карточке выше."
+    ],
+    "cue_card_translation": "Опишите навык, который вы хотели бы освоить. Расскажите:\n— что это за навык\n— почему вы хотите его освоить\n— как вы стали бы этому учиться\n— и объясните, как это изменило бы вашу жизнь."
   },
   {
     "id": "s3",
@@ -45,6 +55,11 @@
       "Develop each answer: opinion, reason, example, and a balancing point.",
       "Use hedging language: 'It depends on...', 'to some extent', 'generally speaking'.",
       "Speculate where relevant: 'In the future, people might...'."
+    ],
+    "questions_translation": [
+      "Как вы думаете, учат ли в школе самым полезным навыкам для взрослой жизни?",
+      "Лучше учиться навыку у преподавателя или самостоятельно?",
+      "Как интернет изменил то, как люди осваивают новые навыки?"
     ]
   },
   {
@@ -63,6 +78,12 @@
       "Useful phrases: 'I'm currently studying...', 'What appeals to me most is...'.",
       "The five-year question needs future forms: 'I'd like to be…', 'I'm hoping to have…'.",
       "Avoid one-word answers, but keep Part 1 replies short — 2 to 3 sentences is ideal."
+    ],
+    "questions_translation": [
+      "Вы работаете или учитесь?",
+      "Что вам больше всего нравится в вашей работе или на вашем курсе?",
+      "Хотели бы вы что-то в этом изменить?",
+      "Чем вы надеетесь заниматься через пять лет?"
     ]
   },
   {
@@ -80,6 +101,12 @@
       "Use frequency adverbs to sound natural: 'I tend to…', 'More often than not…', 'Every now and then…'.",
       "The 'changed since childhood' question is your chance to use 'used to' and past tenses.",
       "Do not memorise answers word for word — examiners notice, and it lowers your Fluency score."
+    ],
+    "questions_translation": [
+      "Чем вы обычно занимаетесь в свободное время?",
+      "Вы предпочитаете проводить свободное время в одиночестве или с другими людьми?",
+      "Изменились ли ваши увлечения с детства?",
+      "Как вы считаете, хватает ли людям сегодня свободного времени?"
     ]
   },
   {
@@ -95,7 +122,11 @@
       "This is a narrative — past tenses throughout, including past continuous for background ('We were driving through the mountains when…').",
       "Save the 'why you remember it' bullet for the end; it is where you earn marks for developed language.",
       "Add sensory detail: what you saw, heard, how it felt. Detail is what fills two minutes."
-    ]
+    ],
+    "questions_translation": [
+      "Запишите голосовое на 1–2 минуты с рассказом о поездке по карточке выше."
+    ],
+    "cue_card_translation": "Опишите поездку, которую вы хорошо помните. Расскажите:\n— куда вы ездили\n— с кем вы путешествовали\n— что произошло во время поездки\n— и объясните, почему вы так хорошо её помните."
   },
   {
     "id": "s7",
@@ -110,7 +141,11 @@
       "Use varied character adjectives instead of 'nice' and 'good': supportive, determined, easy-going, principled.",
       "Relationship phrases: 'We go back years', 'She's been a mentor to me', 'I look up to him'.",
       "The influence bullet needs a concrete example — a specific piece of advice or a moment that changed your thinking."
-    ]
+    ],
+    "questions_translation": [
+      "Запишите голосовое на 1–2 минуты с рассказом об этом человеке по карточке выше."
+    ],
+    "cue_card_translation": "Опишите человека, который сильно повлиял на вашу жизнь. Расскажите:\n— кто этот человек\n— откуда вы его знаете\n— что он за человек\n— и объясните, как он на вас повлиял."
   },
   {
     "id": "s8",
@@ -127,6 +162,12 @@
       "Structure each answer: state a position, give a reason, illustrate it, then acknowledge a counterpoint.",
       "Topic vocabulary: infrastructure, seasonal employment, over-tourism, cultural exchange, carbon footprint.",
       "The final question is a speculation question — use 'might', 'could well', 'I imagine we'll see…'."
+    ],
+    "questions_translation": [
+      "Как вы думаете, почему международные поездки стали такими популярными?",
+      "Как туризм влияет на местные сообщества?",
+      "Может ли туризм навредить тем местам, ради которых люди едут?",
+      "Как может измениться то, как люди путешествуют, в ближайшие пятьдесят лет?"
     ]
   },
   {
@@ -145,6 +186,12 @@
       "Use cause-and-effect language: 'This has led to…', 'One consequence of this is…', 'It stems from…'.",
       "Balance your view: 'While there are clear benefits, the flip side is…'.",
       "If you need thinking time: 'That's an interesting question — I suppose…'."
+    ],
+    "questions_translation": [
+      "Как технологии изменили то, как семьи проводят время вместе?",
+      "Считаете ли вы, что пожилым людям труднее осваивать новые технологии? Почему?",
+      "Нужно ли ограничивать то, сколько технологий используют дети?",
+      "Какими могут быть отрицательные последствия чрезмерной зависимости от технологий?"
     ]
   }
 ]

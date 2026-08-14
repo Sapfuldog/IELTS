@@ -26,10 +26,32 @@ from app.services.grading import (  # noqa: E402
 
 errors: list[str] = []
 counts: dict[str, int] = {}
+translated: dict[str, tuple[int, int]] = {}  # section -> (with translation, total)
 
 
 def err(where: str, msg: str) -> None:
     errors.append(f"{where}: {msg}")
+
+
+def check_translation(where: str, value, *, required_len: int | None = None) -> bool:
+    """Translations are optional, but a present one must be usable."""
+    if value is None:
+        return False
+    if required_len is not None:
+        if not isinstance(value, list):
+            err(where, "translation list expected")
+            return False
+        if len(value) != required_len:
+            err(where, f"translation list has {len(value)} entries, expected {required_len}")
+            return False
+        if any(not str(v).strip() for v in value):
+            err(where, "empty entry in translation list")
+            return False
+        return True
+    if not str(value).strip():
+        err(where, "translation is empty")
+        return False
+    return True
 
 
 def check_questions(where: str, questions: list[dict]) -> int:
@@ -83,6 +105,7 @@ def check_quiz_section(section: str) -> None:
     items = content.get_all(section)
     seen: set[str] = set()
     total_q = 0
+    with_tr = 0
     for ex in items:
         eid = ex.get("id", "<no id>")
         where = f"{section}/{eid}"
@@ -94,18 +117,21 @@ def check_quiz_section(section: str) -> None:
         body = "passage" if section == "reading" else "audio_text"
         if not ex.get(body):
             err(where, f"missing '{body}'")
+        with_tr += check_translation(where, ex.get("translation"))
         questions = ex.get("questions")
         if not questions:
             err(where, "no questions")
             continue
         total_q += check_questions(where, questions)
     counts[section] = len(items)
-    print(f"  {section:<11} {len(items)} exercises, {total_q} questions")
+    translated[section] = (with_tr, len(items))
+    print(f"  {section:<11} {len(items)} exercises, {total_q} questions, {with_tr}/{len(items)} translated")
 
 
 def check_writing() -> None:
     items = content.get_all("writing")
     seen: set[str] = set()
+    with_tr = 0
     for ex in items:
         eid = ex.get("id", "<no id>")
         where = f"writing/{eid}"
@@ -119,14 +145,17 @@ def check_writing() -> None:
             err(where, "'task' must be 1 or 2")
         if not ex.get("tips"):
             err(where, "missing tips")
+        with_tr += check_translation(where, ex.get("translation"))
     counts["writing"] = len(items)
-    print(f"  {'writing':<11} {len(items)} tasks")
+    translated["writing"] = (with_tr, len(items))
+    print(f"  {'writing':<11} {len(items)} tasks, {with_tr}/{len(items)} translated")
 
 
 def check_speaking() -> None:
     items = content.get_all("speaking")
     seen: set[str] = set()
     total_q = 0
+    with_tr = 0
     for ex in items:
         eid = ex.get("id", "<no id>")
         where = f"speaking/{eid}"
@@ -143,15 +172,24 @@ def check_speaking() -> None:
             err(where, "Part 2 sets need a cue_card")
         if not ex.get("tips"):
             err(where, "missing tips")
-        total_q += len(ex.get("questions", []))
+        n_q = len(ex.get("questions", []))
+        total_q += n_q
+        # Parallel list — a mismatch would silently mislabel questions.
+        with_tr += check_translation(
+            where, ex.get("questions_translation"), required_len=n_q
+        )
+        if ex.get("cue_card"):
+            check_translation(f"{where} cue_card", ex.get("cue_card_translation"))
     counts["speaking"] = len(items)
-    print(f"  {'speaking':<11} {len(items)} sets, {total_q} prompts")
+    translated["speaking"] = (with_tr, len(items))
+    print(f"  {'speaking':<11} {len(items)} sets, {total_q} prompts, {with_tr}/{len(items)} translated")
 
 
 def check_vocabulary() -> None:
     items = content.get_all("vocabulary")
     seen: set[str] = set()
     total_cards = 0
+    with_tr = 0
     for ex in items:
         eid = ex.get("id", "<no id>")
         where = f"vocabulary/{eid}"
@@ -167,9 +205,11 @@ def check_vocabulary() -> None:
             for field in ("word", "definition", "example"):
                 if not card.get(field):
                     err(f"{where} card{j}", f"missing '{field}'")
+            with_tr += check_translation(f"{where} card{j}", card.get("translation"))
         total_cards += len(cards)
     counts["vocabulary"] = len(items)
-    print(f"  {'vocabulary':<11} {len(items)} decks, {total_cards} cards")
+    translated["vocabulary"] = (with_tr, total_cards)
+    print(f"  {'vocabulary':<11} {len(items)} decks, {total_cards} cards, {with_tr}/{total_cards} translated")
 
 
 def main() -> int:

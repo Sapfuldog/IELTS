@@ -9,6 +9,7 @@ from aiogram.types import CallbackQuery, Message
 from app import keyboards as kb
 from app.config import Config
 from app.db import Database
+from app.formatting import esc, translation_block
 from app.services import content
 from app.services.evaluation import evaluate_essay
 from app.states import Writing
@@ -38,15 +39,17 @@ async def start_task(call: CallbackQuery, state: FSMContext) -> None:
     await state.set_state(Writing.awaiting_essay)
     await state.update_data(task_id=task_id)
 
-    tips = "\n".join(f"• {t}" for t in task.get("tips", []))
+    tips = "\n".join(f"• {esc(t)}" for t in task.get("tips", []))
     await call.message.answer(
-        f"✍️ <b>Writing Task {task['task']}: {task['title']}</b>\n"
+        f"✍️ <b>Writing Task {task['task']}: {esc(task['title'])}</b>\n"
         f"<i>Minimum {task['min_words']} words.</i>\n\n"
-        f"{task['prompt']}\n\n"
+        f"{esc(task['prompt'])}\n\n"
         f"<b>Tips</b>\n{tips}\n\n"
         "When you're ready, send your full answer as one message. "
         "Send /cancel to stop."
     )
+    if task.get("translation"):
+        await call.message.answer(translation_block(task["translation"]))
 
 
 @router.message(Writing.awaiting_essay, F.text)

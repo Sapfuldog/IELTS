@@ -12,6 +12,7 @@ from aiogram.types import BufferedInputFile, CallbackQuery, Message
 
 from app import keyboards as kb
 from app.db import Database
+from app.formatting import esc, spoiler, split_message, translation_block
 from app.services import content, tts
 from app.services.grading import correct_answer_text, is_correct
 from app.states import Quiz
@@ -68,14 +69,29 @@ async def _start(call: CallbackQuery, state: FSMContext, section: str) -> None:
         section=section, exercise_id=exercise_id, q_index=0, correct=0
     )
 
-    await call.message.answer(f"<b>{exercise['title']}</b>")
+    await call.message.answer(f"<b>{esc(exercise['title'])}</b>")
 
     if section == "reading":
-        await call.message.answer(exercise["passage"])
-    else:  # listening
+        await _send_reading(call.message, exercise)
+    else:
         await _send_listening(call.message, exercise)
 
     await _send_question(call.message, state)
+
+
+async def _send_translation(message: Message, exercise: dict) -> None:
+    """Russian translation, hidden behind a spoiler so it never gives the text away."""
+    translation = exercise.get("translation")
+    if not translation:
+        return
+    for chunk in split_message(translation):
+        await message.answer(translation_block(chunk))
+
+
+async def _send_reading(message: Message, exercise: dict) -> None:
+    for chunk in split_message(exercise["passage"]):
+        await message.answer(esc(chunk))
+    await _send_translation(message, exercise)
 
 
 async def _send_listening(message: Message, exercise: dict) -> None:
@@ -88,11 +104,18 @@ async def _send_listening(message: Message, exercise: dict) -> None:
             voice,
             caption="🎧 Listen carefully. You can replay it before answering.",
         )
+        # The script would hand over the answers, so it stays hidden too —
+        # available for checking, but only once the learner chooses to look.
+        for chunk in split_message(audio_text):
+            await message.answer(f"📄 <i>Скрипт (нажмите, чтобы открыть)</i>\n{spoiler(chunk)}")
     else:
         await message.answer(
             "🎧 <i>(Audio unavailable — read the transcript instead. "
-            "Install gTTS to hear it as speech.)</i>\n\n" + audio_text
+            "Install gTTS to hear it as speech.)</i>"
         )
+        for chunk in split_message(audio_text):
+            await message.answer(esc(chunk))
+    await _send_translation(message, exercise)
 
 
 # --- Question rendering & answer checking ---------------------------------
@@ -103,7 +126,7 @@ async def _send_question(message: Message, state: FSMContext) -> None:
     idx = data["q_index"]
     total = len(exercise["questions"])
     q = exercise["questions"][idx]
-    header = f"❓ <b>Question {idx + 1}/{total}</b>\n\n{q['q']}"
+    header = f"❓ <b>Question {idx + 1}/{total}</b>\n\n{esc(q['q'])}"
 
     if q["type"] == "mc":
         await message.answer(header, reply_markup=kb.mc_options(q["options"]))
@@ -126,8 +149,8 @@ async def _grade(message: Message, state: FSMContext, db: Database, given: str) 
     correct = is_correct(q, given)
     right = correct_answer_text(q)
 
-    verdict = "✅ Correct!" if correct else f"❌ Not quite. Answer: <b>{right}</b>"
-    explanation = q.get("explanation", "")
+    verdict = "✅ Correct!" if correct else f"❌ Not quite. Answer: <b>{esc(right)}</b>"
+    explanation = esc(q.get("explanation", ""))
     await message.answer(f"{verdict}\n\n{explanation}".strip())
 
     new_correct = data["correct"] + (1 if correct else 0)
@@ -158,7 +181,7 @@ async def _finish(message: Message, state: FSMContext, db: Database) -> None:
     pct = correct / total * 100
     emoji = "🏆" if pct == 100 else "👍" if pct >= 60 else "📚"
     await message.answer(
-        f"{emoji} <b>Finished: {exercise['title']}</b>\n"
+        f"{emoji} <b>Finished: {esc(exercise['title'])}</b>\n"
         f"Score: <b>{correct}/{total}</b> ({pct:.0f}%)\n\n"
         "Pick another exercise or a different section from the menu.",
         reply_markup=kb.main_menu(),

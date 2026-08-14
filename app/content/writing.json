@@ -10,7 +10,8 @@
       "Devote each body paragraph to one main idea, supported with an example.",
       "Use linking words: however, furthermore, as a result, on the other hand.",
       "Aim for at least 250 words and leave time to check grammar."
-    ]
+    ],
+    "translation": "Некоторые считают, что современные технологии общения — смартфоны и социальные сети — сделали людей менее общительными в реальной жизни. В какой мере вы согласны или не согласны?\n\nОбоснуйте свой ответ и приведите примеры из собственных знаний или опыта."
   },
   {
     "id": "w2",
@@ -23,7 +24,8 @@
       "Write an overview sentence describing the main trend — do not give an opinion.",
       "Group data logically and quote key figures.",
       "Aim for at least 150 words; use past tenses for past years."
-    ]
+    ],
+    "translation": "На диаграмме ниже показана доля домохозяйств одной страны, владевших автомобилем, телевизором и мобильным телефоном в 2000, 2010 и 2020 годах.\n\nОпишите информацию, выделив и изложив основные особенности, и проведите сравнения там, где это уместно. (Поскольку это текстовый бот, представьте разумные цифры: все три показателя растут со временем, быстрее всего — мобильные телефоны.)"
   },
   {
     "id": "w3",
@@ -36,7 +38,8 @@
       "Do not leave your opinion until the conclusion only; state it in the introduction too.",
       "Give one body paragraph to each view, and make sure they are balanced in length.",
       "Useful phrases: 'Advocates of X argue that…', 'Those on the other side contend…'."
-    ]
+    ],
+    "translation": "Одни считают, что высшее образование должно быть бесплатным для всех студентов и полностью финансироваться государством. Другие полагают, что студенты должны сами оплачивать его полную стоимость.\n\nОбсудите обе точки зрения и изложите собственное мнение."
   },
   {
     "id": "w4",
@@ -49,7 +52,8 @@
       "Use concrete examples: recycling rates, carbon taxes, single-use plastic bans.",
       "Topic vocabulary: emissions, sustainability, regulation, carbon footprint, incentives.",
       "Make your position consistent from introduction to conclusion."
-    ]
+    ],
+    "translation": "Одни говорят, что защита окружающей среды — это ответственность отдельных людей, другие утверждают, что реальную разницу могут создать только правительства и крупные компании.\n\nОбсудите обе точки зрения и изложите собственное мнение."
   },
   {
     "id": "w5",
@@ -62,7 +66,8 @@
       "Consider deterrence, reoffending rates and the cost to taxpayers.",
       "Topic vocabulary: deterrent, reoffending/recidivism, rehabilitation, custodial sentence.",
       "Concede a point to the opposing side; this demonstrates a sophisticated argument."
-    ]
+    ],
+    "translation": "Некоторые считают, что лучший способ снизить преступность — увеличивать сроки тюремного заключения. Другие думают, что есть более действенные альтернативы, например образование и общественные программы.\n\nОбсудите обе точки зрения и изложите собственное мнение."
   },
   {
     "id": "w6",
@@ -75,7 +80,8 @@
       "Trend language: rose sharply, climbed steadily, peaked at, levelled off, declined gradually.",
       "Always include units and the time frame ('in thousands', 'over the four decades').",
       "Never speculate about WHY the trends happened — only describe what is shown."
-    ]
+    ],
+    "translation": "На графике ниже показано население трёх городов — Эшфорда, Беллкасла и Корвилла — с 1980 по 2020 год, в тысячах человек.\n\nОпишите информацию, выделив и изложив основные особенности, и проведите сравнения там, где это уместно. (Представьте: Эшфорд стабильно растёт со 120 до 340; Беллкасл достигает пика 280 в 2000 году, затем падает до 210; Корвилл остаётся почти неизменным на уровне около 150.)"
   },
   {
     "id": "w7",
@@ -88,7 +94,8 @@
       "The passive voice is essential here: 'the water is screened', 'chlorine is added'.",
       "Your overview should say how many stages there are and where the process begins and ends.",
       "Do not add opinions or explanations that are not in the diagram."
-    ]
+    ],
+    "translation": "На схеме ниже показан процесс очистки речной воды до состояния, пригодного для питья.\n\nОпишите информацию, выделив и изложив основные особенности. (Представьте такие этапы: забор из реки → решётка для удаления крупного мусора → отстойник → песчаная фильтрация → хлорирование → резервуар хранения → подача в дома.)"
   },
   {
     "id": "w8",
@@ -101,6 +108,7 @@
       "Cover all three bullet points — missing one caps your Task Achievement score.",
       "State the action you want clearly and firmly but politely: 'I would therefore request a full refund.'",
       "150 words minimum; a clear paragraph for each bullet works well."
-    ]
+    ],
+    "translation": "Вы недавно купили ноутбук в интернет-магазине, но он пришёл повреждённым, а магазин не отвечает на ваши письма.\n\nНапишите письмо руководителю службы поддержки. В письме:\n— объясните, что и когда вы купили\n— опишите проблему с товаром\n— укажите, каких действий вы ждёте от компании\n\nНачните письмо словами «Dear Sir or Madam,». Адреса писать не нужно."
   }
 ]

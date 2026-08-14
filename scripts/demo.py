@@ -82,6 +82,16 @@ def prompt_for(q: dict, auto: bool) -> str:
     return input("\n  Your answer: ").strip()
 
 
+def show_translation(exercise: dict, auto: bool) -> None:
+    """In the bot this sits behind a spoiler; the terminal asks before printing."""
+    translation = exercise.get("translation")
+    if not translation:
+        return
+    if not auto:
+        input("  🇷🇺 (press Enter to show the translation, or Ctrl+C to skip) ")
+        print("\n" + wrap(translation) + "\n")
+
+
 def play_quiz(section: str, exercise: dict, auto: bool) -> int:
     rule("═")
     print(f"  {exercise['title']}  [{exercise.get('level', '')}]")
@@ -90,8 +100,9 @@ def play_quiz(section: str, exercise: dict, auto: bool) -> int:
     if section == "reading":
         print("\n" + wrap(exercise["passage"]) + "\n")
     else:
-        print("\n🎧 TRANSCRIPT (the bot sends this as a voice clip):\n")
+        print("\n🎧 TRANSCRIPT (hidden behind a spoiler in the bot):\n")
         print(wrap(exercise["audio_text"]) + "\n")
+    show_translation(exercise, auto)
 
     correct = 0
     questions = exercise["questions"]
@@ -159,6 +170,8 @@ def show_vocab(vset: dict, auto: bool) -> None:
         print(f"\n  🃏 {i}/{len(vset['cards'])}   {card['word']}")
         if not auto:
             input("     (press Enter to reveal) ")
+        if card.get("translation"):
+            print(f"     🇷🇺 {card['translation']}")
         print(f"     → {card['definition']}")
         print(f"     💬 {card['example']}")
     print()
