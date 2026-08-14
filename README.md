@@ -52,6 +52,36 @@ traceback, so a network problem is never mistaken for a bug in the code.
 - `gTTS` → real voice clips in the Listening section (falls back to transcript text otherwise).
 - `anthropic` → AI-graded Writing feedback.
 
+## Running with Docker
+
+```bash
+cp .env.example .env          # paste your @BotFather token into BOT_TOKEN
+docker compose up -d --build  # build and start
+docker compose logs -f        # watch it connect
+```
+
+A successful start logs `Started as @yourbot (id=…)`. To stop: `docker compose down`
+(add `-v` to also delete the database and cached audio).
+
+Notes on the setup:
+
+- **The token is never baked into the image.** `.env` is listed in
+  `.dockerignore` and passed at runtime via `env_file`, so the image stays safe
+  to push to a registry.
+- **Data survives rebuilds.** The SQLite database and the cached TTS audio live
+  in named volumes (`ielts-data`, `ielts-media`) rather than in the container.
+- **Content is validated at build time.** A broken JSON edit fails
+  `docker compose build` instead of surfacing at a learner's first request.
+- **The container runs as an unprivileged user** (`ielts`, uid 1000).
+- Logs are capped at 3 × 10 MB so a long-running bot cannot fill the disk.
+
+Useful one-offs:
+
+```bash
+docker compose run --rm bot python scripts/validate_content.py
+docker compose run --rm bot python scripts/demo.py reading r4 --auto
+```
+
 ## Testing it without Telegram
 
 You do not need a bot token to check that everything works.
@@ -109,6 +139,9 @@ app/
 scripts/
 ├── validate_content.py  # content integrity check (CI-friendly)
 └── demo.py              # play any exercise in the terminal
+
+Dockerfile               # unprivileged image, validates content at build time
+docker-compose.yml       # named volumes for the DB and audio cache
 ```
 
 ## Adding content

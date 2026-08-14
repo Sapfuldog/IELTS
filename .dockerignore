@@ -1,0 +1,27 @@
+# Secrets must never be baked into an image — the token is passed at runtime
+# via env_file / -e instead.
+.env
+
+# Local virtualenvs and caches
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Runtime state (lives in volumes, not in the image)
+data/
+media/
+*.db
+*.sqlite3
+
+# VCS and editor noise
+.git/
+.gitignore
+.idea/
+.vscode/
+.DS_Store
+
+# Docs are not needed at runtime
+README.md
