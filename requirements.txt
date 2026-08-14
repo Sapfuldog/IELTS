@@ -1,0 +1,6 @@
+aiogram==3.13.1
+aiosqlite==0.20.0
+python-dotenv==1.0.1
+# Optional, enabled automatically if installed:
+gTTS==2.5.3            # voice generation for the Listening section
+anthropic==0.39.0      # AI-based Writing/Speaking feedback (needs ANTHROPIC_API_KEY)

@@ -1,0 +1,28 @@
+[
+  {
+    "id": "w1",
+    "task": 2,
+    "title": "Technology and Communication",
+    "min_words": 250,
+    "prompt": "Some people believe that modern communication technology, such as smartphones and social media, has made people less sociable in real life. To what extent do you agree or disagree?\n\nGive reasons for your answer and include relevant examples from your own knowledge or experience.",
+    "tips": [
+      "State a clear position in the introduction.",
+      "Devote each body paragraph to one main idea, supported with an example.",
+      "Use linking words: however, furthermore, as a result, on the other hand.",
+      "Aim for at least 250 words and leave time to check grammar."
+    ]
+  },
+  {
+    "id": "w2",
+    "task": 1,
+    "title": "Describing a Bar Chart",
+    "min_words": 150,
+    "prompt": "The chart below shows the percentage of households in one country that owned a car, a television and a mobile phone in the years 2000, 2010 and 2020.\n\nSummarise the information by selecting and reporting the main features, and make comparisons where relevant. (Since this is a text bot, imagine reasonable figures showing all three rising over time, with mobile phones rising fastest.)",
+    "tips": [
+      "Paraphrase the question in your first sentence.",
+      "Write an overview sentence describing the main trend — do not give an opinion.",
+      "Group data logically and quote key figures.",
+      "Aim for at least 150 words; use past tenses for past years."
+    ]
+  }
+]

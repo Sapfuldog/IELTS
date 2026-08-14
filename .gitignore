@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Environment / secrets
+.env
+
+# Runtime data
+*.db
+*.sqlite3
+data/
+media/tts/*.mp3
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store

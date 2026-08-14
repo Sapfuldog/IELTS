@@ -1,0 +1,24 @@
+[
+  {
+    "id": "v1",
+    "topic": "Academic Writing Band 7+",
+    "cards": [
+      {"word": "significant", "definition": "large or important enough to have an effect", "example": "There was a significant increase in car ownership after 2010."},
+      {"word": "consequently", "definition": "as a result", "example": "Fuel prices rose; consequently, people drove less."},
+      {"word": "notably", "definition": "especially; in particular", "example": "Some sectors grew, notably renewable energy."},
+      {"word": "substantial", "definition": "considerable in size or amount", "example": "A substantial proportion of graduates work abroad."},
+      {"word": "underlying", "definition": "basic or hidden cause of something", "example": "The underlying cause of the trend was economic growth."}
+    ]
+  },
+  {
+    "id": "v2",
+    "topic": "Speaking: Everyday Idioms",
+    "cards": [
+      {"word": "to be over the moon", "definition": "to be extremely happy", "example": "I was over the moon when I passed the exam."},
+      {"word": "once in a blue moon", "definition": "very rarely", "example": "I eat fast food once in a blue moon."},
+      {"word": "to hit the books", "definition": "to study hard", "example": "I need to hit the books before the test."},
+      {"word": "a piece of cake", "definition": "something very easy", "example": "The Reading test was a piece of cake for me."},
+      {"word": "to be on the same page", "definition": "to agree / share understanding", "example": "After the meeting we were all on the same page."}
+    ]
+  }
+]

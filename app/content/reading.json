@@ -1,0 +1,63 @@
+[
+  {
+    "id": "r1",
+    "title": "The History of Tea",
+    "level": "Academic",
+    "passage": "Tea is one of the most widely consumed beverages in the world, second only to water. According to legend, tea was discovered in 2737 BCE by the Chinese Emperor Shen Nung, when leaves from a wild tree blew into his pot of boiling water. For centuries tea remained a distinctly Chinese product, valued both as a medicine and as a refreshing drink.\n\nTea reached Europe in the seventeenth century through Dutch and Portuguese traders. In Britain it was initially an expensive luxury, taxed heavily by the government, which made it a symbol of wealth. It was not until the nineteenth century, when large plantations were established in India and Sri Lanka, that prices fell far enough for tea to become an everyday drink for ordinary people.\n\nToday tea is grown in more than forty countries, and each region produces leaves with a distinctive character shaped by soil, altitude and climate. The process of turning fresh leaves into the dried product involves withering, rolling, oxidising and drying — and small variations in these steps create the difference between green, black and oolong teas.",
+    "questions": [
+      {
+        "type": "mc",
+        "q": "According to the passage, which drink is consumed more than tea?",
+        "options": ["Coffee", "Water", "Wine"],
+        "answer": 1,
+        "explanation": "The first sentence says tea is 'second only to water'."
+      },
+      {
+        "type": "tf",
+        "q": "Tea became a cheap, everyday drink in Britain as soon as it arrived in the 17th century.",
+        "answer": "FALSE",
+        "explanation": "It was an expensive luxury; prices only fell in the 19th century."
+      },
+      {
+        "type": "gap",
+        "q": "Complete the sentence: Large tea plantations were established in India and ____ in the nineteenth century.",
+        "answer": "Sri Lanka",
+        "explanation": "The passage names India and Sri Lanka."
+      },
+      {
+        "type": "mc",
+        "q": "What creates the difference between green, black and oolong tea?",
+        "options": ["The country of origin", "The colour of the pot", "Variations in the processing steps"],
+        "answer": 2,
+        "explanation": "Small variations in withering, rolling, oxidising and drying create the differences."
+      }
+    ]
+  },
+  {
+    "id": "r2",
+    "title": "Urban Green Spaces",
+    "level": "Academic",
+    "passage": "As cities grow, planners increasingly recognise the value of parks, gardens and other green spaces. Beyond their obvious recreational appeal, these areas provide measurable environmental benefits. Trees and plants absorb carbon dioxide and release oxygen, while their leaves trap airborne particles that would otherwise harm human health.\n\nGreen spaces also help cities cope with heat. Dense concrete and asphalt absorb sunlight and re-radiate it, producing the so-called 'urban heat island' effect, which can make city centres several degrees warmer than surrounding countryside. Vegetation counteracts this by providing shade and by cooling the air as water evaporates from leaves.\n\nResearch further suggests that access to nature improves mental well-being, reducing stress and encouraging physical activity. For these reasons many modern city plans now set targets for the amount of green space that must be available within walking distance of every home.",
+    "questions": [
+      {
+        "type": "mc",
+        "q": "What causes the 'urban heat island' effect?",
+        "options": ["Too many trees", "Concrete and asphalt absorbing and re-radiating heat", "Rain evaporating from leaves"],
+        "answer": 1,
+        "explanation": "Dense concrete and asphalt absorb sunlight and re-radiate it."
+      },
+      {
+        "type": "tf",
+        "q": "The passage claims green spaces can improve people's mental well-being.",
+        "answer": "TRUE",
+        "explanation": "Research suggests access to nature reduces stress and improves well-being."
+      },
+      {
+        "type": "gap",
+        "q": "Complete: Vegetation cools the air as water ____ from leaves.",
+        "answer": "evaporates",
+        "explanation": "The passage says the air is cooled as water evaporates from leaves."
+      }
+    ]
+  }
+]

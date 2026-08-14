@@ -1,0 +1,50 @@
+[
+  {
+    "id": "s1",
+    "part": 1,
+    "topic": "Hometown",
+    "intro": "Part 1 is a short interview about familiar topics. Answer each question in 2-3 sentences. Send a voice message or type your answer.",
+    "questions": [
+      "Where is your hometown and what is it like?",
+      "What do you like most about it?",
+      "Has your hometown changed much in recent years?",
+      "Would you like to live there in the future? Why or why not?"
+    ],
+    "tips": [
+      "Give reasons and small details, do not answer with just 'yes' or 'no'.",
+      "Use a range of tenses: present for facts, past for changes, future for plans.",
+      "Useful phrases: 'What I love about it is...', 'It's known for...'."
+    ]
+  },
+  {
+    "id": "s2",
+    "part": 2,
+    "topic": "Describe a skill you would like to learn",
+    "intro": "Part 2 is the 'long turn'. You get a cue card, one minute to prepare, then speak for 1-2 minutes without interruption.",
+    "cue_card": "Describe a skill you would like to learn. You should say:\n- what the skill is\n- why you want to learn it\n- how you would learn it\n- and explain how it would change your life.",
+    "questions": [
+      "Record a 1-2 minute voice message describing the skill using the cue card above."
+    ],
+    "tips": [
+      "Spend your one minute making quick notes for each bullet point.",
+      "Cover every bullet — that structures your two minutes for you.",
+      "Keep talking; hesitation is fine, silence is not. Use fillers like 'Let me think...'."
+    ]
+  },
+  {
+    "id": "s3",
+    "part": 3,
+    "topic": "Learning and Education (discussion)",
+    "intro": "Part 3 is an abstract discussion connected to the Part 2 topic. Give developed, opinion-based answers.",
+    "questions": [
+      "Do you think schools teach the most useful skills for adult life?",
+      "Is it better to learn a skill from a teacher or on your own?",
+      "How has the way people learn new skills changed because of the internet?"
+    ],
+    "tips": [
+      "Develop each answer: opinion, reason, example, and a balancing point.",
+      "Use hedging language: 'It depends on...', 'to some extent', 'generally speaking'.",
+      "Speculate where relevant: 'In the future, people might...'."
+    ]
+  }
+]

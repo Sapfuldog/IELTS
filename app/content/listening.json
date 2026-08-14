@@ -1,0 +1,65 @@
+[
+  {
+    "id": "l1",
+    "title": "Booking a Library Tour",
+    "level": "General",
+    "audio_text": "Hello, City Library, how can I help you? Hi, I'd like to book a place on the guided tour of the library. Certainly. We run tours on Tuesdays and Thursdays. The Tuesday tour starts at ten in the morning, and the Thursday one at two in the afternoon. I'll take the Thursday one, please. Great. Can I have your name? It's Daniel Foster. And the tour lasts about forty-five minutes. Please arrive ten minutes early and wait at the main reception desk on the ground floor.",
+    "questions": [
+      {
+        "type": "mc",
+        "q": "Which day does the caller choose for the tour?",
+        "options": ["Tuesday", "Thursday", "Wednesday"],
+        "answer": 1,
+        "explanation": "Daniel says 'I'll take the Thursday one, please.'"
+      },
+      {
+        "type": "gap",
+        "q": "What time does the chosen tour start? (write like: 2 pm)",
+        "answer": "2 pm",
+        "explanation": "The Thursday tour starts at two in the afternoon.",
+        "accept": ["2pm", "2 pm", "two pm", "14:00", "2 p.m."]
+      },
+      {
+        "type": "gap",
+        "q": "How long does the tour last? (in minutes)",
+        "answer": "45",
+        "explanation": "The tour lasts about forty-five minutes.",
+        "accept": ["45", "forty-five", "forty five"]
+      },
+      {
+        "type": "mc",
+        "q": "Where should visitors wait before the tour?",
+        "options": ["The car park", "The main reception desk", "The cafe"],
+        "answer": 1,
+        "explanation": "Wait at the main reception desk on the ground floor."
+      }
+    ]
+  },
+  {
+    "id": "l2",
+    "title": "Lecture: The Water Cycle",
+    "level": "Academic",
+    "audio_text": "In today's short lecture we'll review the water cycle. It begins with evaporation, when heat from the sun turns liquid water from oceans and lakes into water vapour. This vapour rises and cools, and through a process called condensation it forms clouds. When the water droplets in clouds become heavy enough, they fall back to Earth as precipitation, that is, rain, snow or hail. Finally, water flows over the land and returns to rivers and oceans in a stage known as collection, and the cycle begins again.",
+    "questions": [
+      {
+        "type": "gap",
+        "q": "What is the first stage of the water cycle called?",
+        "answer": "evaporation",
+        "explanation": "The cycle begins with evaporation."
+      },
+      {
+        "type": "mc",
+        "q": "What process forms clouds?",
+        "options": ["Collection", "Condensation", "Precipitation"],
+        "answer": 1,
+        "explanation": "Vapour cools and through condensation forms clouds."
+      },
+      {
+        "type": "gap",
+        "q": "Rain, snow and hail are all examples of ____.",
+        "answer": "precipitation",
+        "explanation": "They fall back to Earth as precipitation."
+      }
+    ]
+  }
+]
