@@ -30,6 +30,12 @@
         "options": ["The country of origin", "The colour of the pot", "Variations in the processing steps"],
         "answer": 2,
         "explanation": "Small variations in withering, rolling, oxidising and drying create the differences."
+      },
+      {
+        "type": "tfng",
+        "q": "Shen Nung wrote a book describing the health benefits of tea.",
+        "answer": "NOT GIVEN",
+        "explanation": "The passage mentions the legend of his discovery but says nothing about him writing a book."
       }
     ]
   },
@@ -57,6 +63,215 @@
         "q": "Complete: Vegetation cools the air as water ____ from leaves.",
         "answer": "evaporates",
         "explanation": "The passage says the air is cooled as water evaporates from leaves."
+      },
+      {
+        "type": "tfng",
+        "q": "Most cities have already met their green space targets.",
+        "answer": "NOT GIVEN",
+        "explanation": "The passage says plans set targets, but never states whether cities have met them."
+      }
+    ]
+  },
+  {
+    "id": "r3",
+    "title": "The Rise of Remote Work",
+    "level": "Academic",
+    "passage": "The idea of working away from a central office is far older than the internet. In the 1970s, an American engineer named Jack Nilles coined the term 'telecommuting' after realising that the fuel consumed by commuters might be saved if information, rather than people, were made to travel. His proposal attracted modest interest, but the technology of the era — expensive terminals and slow telephone lines — kept the practice marginal.\n\nWhat changed the picture was not a single invention but the steady accumulation of cheap bandwidth, portable computers and, crucially, software that allowed documents to be edited by several people at once. By the 2010s a minority of employees in knowledge-based industries were already working remotely for part of the week. The disruption of 2020 then compressed a decade of gradual adoption into a matter of months, as organisations that had insisted remote work was impractical implemented it within weeks.\n\nThe consequences remain contested. Employers point to reduced office costs and access to a wider pool of applicants, while noting concerns about the erosion of informal mentoring, which tends to happen through overheard conversation rather than scheduled meetings. Employees, for their part, consistently report valuing the recovered commuting time above almost every other benefit. What most researchers now expect is neither a full return to the office nor its disappearance, but a hybrid arrangement whose exact shape is still being negotiated workplace by workplace.",
+    "questions": [
+      {
+        "type": "gap",
+        "q": "Which term did Jack Nilles invent in the 1970s?",
+        "answer": "telecommuting",
+        "explanation": "The passage states he coined the term 'telecommuting'."
+      },
+      {
+        "type": "mc",
+        "q": "Why did telecommuting remain uncommon in the 1970s?",
+        "options": [
+          "Employers had not heard of the idea",
+          "The available technology was costly and slow",
+          "Governments discouraged the practice"
+        ],
+        "answer": 1,
+        "explanation": "Expensive terminals and slow telephone lines kept the practice marginal."
+      },
+      {
+        "type": "tfng",
+        "q": "The events of 2020 accelerated a trend that was already under way.",
+        "answer": "TRUE",
+        "explanation": "It 'compressed a decade of gradual adoption into a matter of months'."
+      },
+      {
+        "type": "tfng",
+        "q": "Remote workers in 2020 were paid less than office-based colleagues.",
+        "answer": "NOT GIVEN",
+        "explanation": "Pay is never discussed anywhere in the passage."
+      },
+      {
+        "type": "ynng",
+        "q": "Does the writer believe offices will disappear completely?",
+        "answer": "NO",
+        "explanation": "The writer expects 'neither a full return to the office nor its disappearance', but a hybrid arrangement."
+      },
+      {
+        "type": "mc",
+        "q": "According to the passage, informal mentoring usually occurs through:",
+        "options": ["Scheduled meetings", "Written performance reviews", "Conversation that is overheard"],
+        "answer": 2,
+        "explanation": "It 'tends to happen through overheard conversation rather than scheduled meetings'."
+      }
+    ]
+  },
+  {
+    "id": "r4",
+    "title": "Coral Reefs Under Threat",
+    "level": "Academic",
+    "passage": "Coral reefs occupy less than one per cent of the ocean floor, yet they shelter roughly a quarter of all marine species. This extraordinary density of life rests on an unlikely partnership. The coral animal, a soft polyp that builds a hard limestone skeleton, houses microscopic algae called zooxanthellae within its tissues. The algae photosynthesise and pass as much as ninety per cent of the sugars they produce to their host; in return they receive shelter and a reliable supply of nutrients.\n\nThis partnership is finely tuned to temperature, and therein lies its vulnerability. When water grows too warm for too long, the algae begin producing compounds that damage the polyp, which responds by expelling them. The coral loses its colour — a phenomenon known as bleaching — and, more importantly, its main source of food. A bleached coral is not dead, and if temperatures fall quickly enough the algae can be reacquired. If the heat persists, however, the polyp starves.\n\nWarming is not the only pressure. As the ocean absorbs carbon dioxide it becomes more acidic, which slows the rate at which corals can deposit their skeletons. Locally, sediment from coastal construction clouds the water and blocks the light the algae require. Efforts at restoration have shown some promise: fragments of heat-tolerant coral can be grown in nurseries and transplanted onto degraded reefs. Yet marine biologists are careful to describe such work as buying time rather than providing a solution, since none of it addresses the temperature of the ocean itself.",
+    "questions": [
+      {
+        "type": "gap",
+        "q": "What is the name of the algae that live inside coral tissues?",
+        "answer": "zooxanthellae",
+        "explanation": "The passage names the microscopic algae as zooxanthellae."
+      },
+      {
+        "type": "mc",
+        "q": "What proportion of the sugars produced by the algae goes to the coral?",
+        "options": ["About a quarter", "About half", "As much as ninety per cent"],
+        "answer": 2,
+        "explanation": "The algae 'pass as much as ninety per cent of the sugars they produce to their host'."
+      },
+      {
+        "type": "tfng",
+        "q": "A coral that has bleached is already dead.",
+        "answer": "FALSE",
+        "explanation": "The passage explicitly says 'a bleached coral is not dead' and may recover."
+      },
+      {
+        "type": "gap",
+        "q": "Ocean ____ slows the rate at which corals build their skeletons. (one word)",
+        "answer": "acidification",
+        "explanation": "As the ocean absorbs CO2 it becomes more acidic — ocean acidification.",
+        "accept": ["acidification", "acidity"]
+      },
+      {
+        "type": "ynng",
+        "q": "Does the writer think coral nurseries solve the underlying problem?",
+        "answer": "NO",
+        "explanation": "Such work 'buys time rather than providing a solution', as it does not address ocean temperature."
+      },
+      {
+        "type": "tfng",
+        "q": "Coral reefs cover less than one per cent of the ocean floor.",
+        "answer": "TRUE",
+        "explanation": "Stated directly in the first sentence."
+      }
+    ]
+  },
+  {
+    "id": "r5",
+    "title": "The Science of Sleep",
+    "level": "Academic",
+    "passage": "For most of the twentieth century sleep was regarded as a passive state — the brain, like a machine at the end of a shift, simply switching off. The invention of the electroencephalogram overturned this assumption. Recordings revealed that the sleeping brain passes through repeated cycles of distinct stages, some of which show electrical activity as vigorous as that of waking.\n\nA full cycle lasts roughly ninety minutes and moves from light sleep into deep, slow-wave sleep and then into a paradoxical phase characterised by rapid eye movement, or REM. The proportions shift across the night: slow-wave sleep dominates the early cycles, while REM periods lengthen towards morning. Each phase appears to serve different functions. Slow-wave sleep is associated with physical restoration and with the consolidation of factual memory, whereas REM has been linked to emotional regulation and to the kind of associative thinking that underlies creative insight.\n\nMore recent work has identified a further role. During deep sleep the spaces between brain cells expand, allowing cerebrospinal fluid to flush through the tissue and carry away metabolic waste products that accumulate during waking hours. Among these is beta-amyloid, a protein whose build-up is a hallmark of Alzheimer's disease. The finding has reframed chronic sleep deprivation as a possible risk factor rather than merely an unpleasant condition — though researchers caution that the direction of causation has yet to be established firmly, since poor sleep may equally be an early symptom of the disease process.",
+    "questions": [
+      {
+        "type": "mc",
+        "q": "What overturned the belief that sleep is a passive state?",
+        "options": [
+          "The invention of the electroencephalogram",
+          "Studies of dreams in the 1800s",
+          "The discovery of beta-amyloid"
+        ],
+        "answer": 0,
+        "explanation": "The invention of the EEG revealed cycles of active brain states."
+      },
+      {
+        "type": "gap",
+        "q": "Approximately how many minutes does one full sleep cycle last?",
+        "answer": "90",
+        "explanation": "A full cycle lasts roughly ninety minutes.",
+        "accept": ["90", "ninety", "90 minutes", "ninety minutes"]
+      },
+      {
+        "type": "mc",
+        "q": "Which phase becomes longer towards the morning?",
+        "options": ["Light sleep", "Slow-wave sleep", "REM sleep"],
+        "answer": 2,
+        "explanation": "REM periods lengthen towards morning."
+      },
+      {
+        "type": "tfng",
+        "q": "Slow-wave sleep is linked to the consolidation of factual memory.",
+        "answer": "TRUE",
+        "explanation": "Stated directly in the second paragraph."
+      },
+      {
+        "type": "gap",
+        "q": "During deep sleep, cerebrospinal fluid removes metabolic ____ from brain tissue.",
+        "answer": "waste",
+        "explanation": "The fluid carries away metabolic waste products.",
+        "accept": ["waste", "waste products"]
+      },
+      {
+        "type": "ynng",
+        "q": "Is the writer certain that poor sleep causes Alzheimer's disease?",
+        "answer": "NO",
+        "explanation": "Researchers caution the direction of causation is not firmly established; poor sleep may be a symptom."
+      }
+    ]
+  },
+  {
+    "id": "r6",
+    "title": "The Printing Press and the Spread of Ideas",
+    "level": "Academic",
+    "passage": "When Johannes Gutenberg assembled his printing press in Mainz around 1450, he combined existing elements — the screw press already used for wine, oil-based inks, and the concept of movable type known in Asia for centuries — into a system suited to the European alphabet. His genius lay less in any single component than in the metal alloy he devised for casting type, which was durable enough to survive thousands of impressions yet melted at a low enough temperature to be recast easily.\n\nThe consequences were swift and disproportionate. Within fifty years presses were operating in more than two hundred European cities, and the price of a book had fallen so far that a scholar could own a personal library rather than travelling to consult a chained manuscript. Standardisation followed: because every copy from a print run was identical, scholars in different countries could for the first time refer to the same page of the same edition, a precondition for the cumulative verification that characterises modern science.\n\nHistorians have nevertheless warned against attributing too much to the machine alone. Printing amplified whatever was already circulating, and it served polemic as readily as scholarship — the religious conflicts of the sixteenth century were fought in cheap pamphlets as much as in pulpits. What the press altered was not the character of ideas but the speed and scale at which they could travel, and that shift was sufficient to make institutions built on controlling the copying of texts suddenly fragile.",
+    "questions": [
+      {
+        "type": "mc",
+        "q": "According to the passage, Gutenberg's most important innovation was:",
+        "options": [
+          "The screw press",
+          "The metal alloy used for casting type",
+          "The idea of movable type"
+        ],
+        "answer": 1,
+        "explanation": "His genius 'lay less in any single component than in the metal alloy he devised for casting type'."
+      },
+      {
+        "type": "tfng",
+        "q": "Movable type was invented in Europe.",
+        "answer": "FALSE",
+        "explanation": "The concept was 'known in Asia for centuries' before Gutenberg."
+      },
+      {
+        "type": "gap",
+        "q": "Within fifty years, presses were operating in more than ____ European cities.",
+        "answer": "200",
+        "explanation": "The passage says more than two hundred European cities.",
+        "accept": ["200", "two hundred", "two-hundred"]
+      },
+      {
+        "type": "mc",
+        "q": "Why was the standardisation of printed copies important for science?",
+        "options": [
+          "It made books cheaper to produce",
+          "It allowed scholars to refer to the same page of the same edition",
+          "It reduced the number of printing errors to zero"
+        ],
+        "answer": 1,
+        "explanation": "Identical copies let scholars in different countries cite the same page — a precondition for cumulative verification."
+      },
+      {
+        "type": "ynng",
+        "q": "Does the writer agree that the printing press alone explains the changes of the period?",
+        "answer": "NO",
+        "explanation": "Historians warn 'against attributing too much to the machine alone'; it amplified what already circulated."
+      },
+      {
+        "type": "tfng",
+        "q": "Gutenberg became wealthy from his invention.",
+        "answer": "NOT GIVEN",
+        "explanation": "The passage never discusses Gutenberg's personal finances."
       }
     ]
   }

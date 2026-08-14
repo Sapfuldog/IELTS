@@ -62,6 +62,24 @@ def tf_options() -> InlineKeyboardMarkup:
     return kb.as_markup()
 
 
+def tfng_options() -> InlineKeyboardMarkup:
+    kb = InlineKeyboardBuilder()
+    kb.button(text="✅ TRUE", callback_data="ans:TRUE")
+    kb.button(text="❌ FALSE", callback_data="ans:FALSE")
+    kb.button(text="❔ NOT GIVEN", callback_data="ans:NOT_GIVEN")
+    kb.adjust(2, 1)
+    return kb.as_markup()
+
+
+def ynng_options() -> InlineKeyboardMarkup:
+    kb = InlineKeyboardBuilder()
+    kb.button(text="✅ YES", callback_data="ans:YES")
+    kb.button(text="❌ NO", callback_data="ans:NO")
+    kb.button(text="❔ NOT GIVEN", callback_data="ans:NOT_GIVEN")
+    kb.adjust(2, 1)
+    return kb.as_markup()
+
+
 def next_or_stop(next_label: str = "Next ▶️") -> InlineKeyboardMarkup:
     kb = InlineKeyboardBuilder()
     kb.button(text=next_label, callback_data="flow:next")

@@ -46,5 +46,105 @@
       "Use hedging language: 'It depends on...', 'to some extent', 'generally speaking'.",
       "Speculate where relevant: 'In the future, people might...'."
     ]
+  },
+  {
+    "id": "s4",
+    "part": 1,
+    "topic": "Work and Study",
+    "intro": "Part 1 almost always begins with work or study. These are the most predictable questions in the whole test — prepare them well.",
+    "questions": [
+      "Do you work, or are you a student?",
+      "What do you like most about your job or your course?",
+      "Is there anything you would like to change about it?",
+      "What do you hope to be doing in five years' time?"
+    ],
+    "tips": [
+      "Answer the question first, then add one or two supporting details — do not launch into a memorised speech.",
+      "Useful phrases: 'I'm currently studying...', 'What appeals to me most is...'.",
+      "The five-year question needs future forms: 'I'd like to be…', 'I'm hoping to have…'.",
+      "Avoid one-word answers, but keep Part 1 replies short — 2 to 3 sentences is ideal."
+    ]
+  },
+  {
+    "id": "s5",
+    "part": 1,
+    "topic": "Free Time and Hobbies",
+    "intro": "A very common Part 1 topic. Aim for natural, fluent answers rather than complex ones.",
+    "questions": [
+      "What do you usually do in your free time?",
+      "Do you prefer spending free time alone or with other people?",
+      "Have your hobbies changed since you were a child?",
+      "Do you think people today have enough free time?"
+    ],
+    "tips": [
+      "Use frequency adverbs to sound natural: 'I tend to…', 'More often than not…', 'Every now and then…'.",
+      "The 'changed since childhood' question is your chance to use 'used to' and past tenses.",
+      "Do not memorise answers word for word — examiners notice, and it lowers your Fluency score."
+    ]
+  },
+  {
+    "id": "s6",
+    "part": 2,
+    "topic": "Describe a memorable journey",
+    "intro": "Another common Part 2 cue card. One minute to prepare, then speak for 1-2 minutes.",
+    "cue_card": "Describe a journey that you remember well. You should say:\n- where you went\n- who you travelled with\n- what happened during the journey\n- and explain why you remember it so well.",
+    "questions": [
+      "Record a 1-2 minute voice message describing the journey using the cue card above."
+    ],
+    "tips": [
+      "This is a narrative — past tenses throughout, including past continuous for background ('We were driving through the mountains when…').",
+      "Save the 'why you remember it' bullet for the end; it is where you earn marks for developed language.",
+      "Add sensory detail: what you saw, heard, how it felt. Detail is what fills two minutes."
+    ]
+  },
+  {
+    "id": "s7",
+    "part": 2,
+    "topic": "Describe a person who influenced you",
+    "intro": "A 'describe a person' cue card. One minute to prepare, then speak for 1-2 minutes.",
+    "cue_card": "Describe a person who has had an important influence on your life. You should say:\n- who the person is\n- how you know them\n- what kind of person they are\n- and explain how they have influenced you.",
+    "questions": [
+      "Record a 1-2 minute voice message describing this person using the cue card above."
+    ],
+    "tips": [
+      "Use varied character adjectives instead of 'nice' and 'good': supportive, determined, easy-going, principled.",
+      "Relationship phrases: 'We go back years', 'She's been a mentor to me', 'I look up to him'.",
+      "The influence bullet needs a concrete example — a specific piece of advice or a moment that changed your thinking."
+    ]
+  },
+  {
+    "id": "s8",
+    "part": 3,
+    "topic": "Travel and Tourism (discussion)",
+    "intro": "Part 3 follows the Part 2 travel topic with broader, more abstract questions. Answers should be longer and more analytical than Part 1.",
+    "questions": [
+      "Why do you think international travel has become so popular?",
+      "What effects does tourism have on local communities?",
+      "Do you think tourism can damage the places people travel to see?",
+      "How might the way people travel change in the next fifty years?"
+    ],
+    "tips": [
+      "Structure each answer: state a position, give a reason, illustrate it, then acknowledge a counterpoint.",
+      "Topic vocabulary: infrastructure, seasonal employment, over-tourism, cultural exchange, carbon footprint.",
+      "The final question is a speculation question — use 'might', 'could well', 'I imagine we'll see…'."
+    ]
+  },
+  {
+    "id": "s9",
+    "part": 3,
+    "topic": "Technology and Society (discussion)",
+    "intro": "An abstract Part 3 set. The examiner is testing whether you can discuss ideas, not just your own life.",
+    "questions": [
+      "In what ways has technology changed the way families spend time together?",
+      "Do you think older people find it harder to adapt to new technology? Why?",
+      "Should there be limits on how much technology children use?",
+      "What might be the negative consequences of relying too heavily on technology?"
+    ],
+    "tips": [
+      "Talk about people in general, not just yourself — Part 3 rewards generalisation.",
+      "Use cause-and-effect language: 'This has led to…', 'One consequence of this is…', 'It stems from…'.",
+      "Balance your view: 'While there are clear benefits, the flip side is…'.",
+      "If you need thinking time: 'That's an interesting question — I suppose…'."
+    ]
   }
 ]

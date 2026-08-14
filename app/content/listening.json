@@ -61,5 +61,199 @@
         "explanation": "They fall back to Earth as precipitation."
       }
     ]
+  },
+  {
+    "id": "l3",
+    "title": "Renting a Flat: Enquiry Form",
+    "level": "General",
+    "audio_text": "Good morning, Bridgeway Lettings. Morning. I'm calling about the two-bedroom flat advertised on Wilton Road. Of course. Could I take a few details? Your name, please? Yes, it's Amelia Hartley, that's H-A-R-T-L-E-Y. Thank you. And a contact number? It's oh seven double seven, one four two, nine oh six. Lovely. Now, the flat is eight hundred and fifty pounds per month, and that does include water, but not electricity or internet. Right. And when is it available? From the first of September. There's also a deposit equivalent to five weeks' rent. One more thing — is parking included? There's no private space, unfortunately, but residents can apply for a street permit from the council. Viewings are on Saturday mornings, and I'd suggest bringing proof of employment with you.",
+    "questions": [
+      {
+        "type": "gap",
+        "q": "What is the caller's surname?",
+        "answer": "Hartley",
+        "explanation": "She spells it out: H-A-R-T-L-E-Y."
+      },
+      {
+        "type": "gap",
+        "q": "What is the monthly rent in pounds? (numbers only)",
+        "answer": "850",
+        "explanation": "Eight hundred and fifty pounds per month.",
+        "accept": ["850", "£850", "850 pounds"]
+      },
+      {
+        "type": "mc",
+        "q": "Which bill is included in the rent?",
+        "options": ["Electricity", "Water", "Internet"],
+        "answer": 1,
+        "explanation": "'That does include water, but not electricity or internet.'"
+      },
+      {
+        "type": "gap",
+        "q": "The flat is available from the first of ____.",
+        "answer": "September",
+        "explanation": "The agent says it is available from the first of September."
+      },
+      {
+        "type": "mc",
+        "q": "What is said about parking?",
+        "options": [
+          "A private space is included",
+          "There is no parking of any kind",
+          "Residents can apply to the council for a street permit"
+        ],
+        "answer": 2,
+        "explanation": "No private space, but residents can apply for a street permit from the council."
+      },
+      {
+        "type": "gap",
+        "q": "What should viewers bring to a viewing? Proof of ____.",
+        "answer": "employment",
+        "explanation": "She suggests bringing proof of employment."
+      }
+    ]
+  },
+  {
+    "id": "l4",
+    "title": "Gym Membership Enquiry",
+    "level": "General",
+    "audio_text": "Welcome to Riverside Fitness, how can I help? Hi, I'd like to know about joining. Certainly. We have three membership types. The Standard is thirty pounds a month and gives you access to the gym floor only. The Plus, at forty-five pounds, adds all the group classes. And the Premium, at sixty pounds, includes classes plus the swimming pool and sauna. I think the Plus would suit me — I mainly want the classes. Good choice, that's our most popular option. There's a joining fee of twenty pounds, though we're waiving that this month. And what are the opening hours? We open at six in the morning on weekdays and close at ten at night. Weekends we're open eight until eight. One thing to note — the classes must be booked through our app, and they release forty-eight hours in advance.",
+    "questions": [
+      {
+        "type": "gap",
+        "q": "How much does the Plus membership cost per month, in pounds? (numbers only)",
+        "answer": "45",
+        "explanation": "The Plus membership is forty-five pounds.",
+        "accept": ["45", "£45", "45 pounds"]
+      },
+      {
+        "type": "mc",
+        "q": "Which membership includes the swimming pool?",
+        "options": ["Standard", "Plus", "Premium"],
+        "answer": 2,
+        "explanation": "The Premium includes classes plus the swimming pool and sauna."
+      },
+      {
+        "type": "mc",
+        "q": "What does the receptionist say about the joining fee?",
+        "options": [
+          "It is being waived this month",
+          "It must be paid in cash",
+          "It is added to the first month's payment"
+        ],
+        "answer": 0,
+        "explanation": "'There's a joining fee of twenty pounds, though we're waiving that this month.'"
+      },
+      {
+        "type": "gap",
+        "q": "What time does the gym open on weekdays? (write like: 6 am)",
+        "answer": "6 am",
+        "explanation": "They open at six in the morning on weekdays.",
+        "accept": ["6am", "6 am", "six am", "06:00", "6 a.m."]
+      },
+      {
+        "type": "gap",
+        "q": "Classes are released how many hours in advance? (numbers only)",
+        "answer": "48",
+        "explanation": "Classes release forty-eight hours in advance.",
+        "accept": ["48", "forty-eight", "forty eight"]
+      }
+    ]
+  },
+  {
+    "id": "l5",
+    "title": "Lecture: Renewable Energy",
+    "level": "Academic",
+    "audio_text": "Today I want to outline the three renewable sources that dominate current investment. First, hydropower, which remains the largest source of renewable electricity worldwide. It is reliable and can be adjusted quickly to meet demand, but suitable river sites are limited and large dams displace communities. Second, wind. Costs here have fallen dramatically — by roughly seventy per cent over the past decade — and offshore turbines in particular can now be built at a scale that rivals conventional power stations. The obvious drawback is intermittency: the wind does not blow on demand. Third, solar photovoltaics, which have seen the steepest cost decline of all and can be deployed on almost any scale, from a single rooftop to a desert installation covering many square kilometres. The central challenge shared by wind and solar is storage. Without an economical way to hold electricity for the hours or days when generation falls short, grids must retain backup capacity, and it is battery technology, more than generation itself, that will determine how quickly the transition proceeds.",
+    "questions": [
+      {
+        "type": "mc",
+        "q": "Which source is currently the largest provider of renewable electricity?",
+        "options": ["Wind", "Hydropower", "Solar"],
+        "answer": 1,
+        "explanation": "Hydropower 'remains the largest source of renewable electricity worldwide'."
+      },
+      {
+        "type": "gap",
+        "q": "Wind costs have fallen by roughly what percentage over the past decade? (numbers only)",
+        "answer": "70",
+        "explanation": "Costs fell by roughly seventy per cent.",
+        "accept": ["70", "70%", "seventy", "seventy per cent"]
+      },
+      {
+        "type": "mc",
+        "q": "What is named as the main drawback of wind power?",
+        "options": ["Its high cost", "Its intermittency", "The land it requires"],
+        "answer": 1,
+        "explanation": "'The obvious drawback is intermittency: the wind does not blow on demand.'"
+      },
+      {
+        "type": "gap",
+        "q": "What is the central challenge shared by wind and solar?",
+        "answer": "storage",
+        "explanation": "The lecturer says the central challenge shared by both is storage."
+      },
+      {
+        "type": "mc",
+        "q": "According to the speaker, what will most determine the speed of the energy transition?",
+        "options": ["Battery technology", "Government subsidies", "The number of new dams"],
+        "answer": 0,
+        "explanation": "'It is battery technology, more than generation itself, that will determine how quickly the transition proceeds.'"
+      }
+    ]
+  },
+  {
+    "id": "l6",
+    "title": "Student Advisor: Choosing Modules",
+    "level": "Academic",
+    "audio_text": "Come in, take a seat. You wanted to talk about your module choices? Yes, I'm in my second year of Environmental Science and I'm not sure what to pick for next semester. Right. You need one hundred and twenty credits in total for the year, and your two core modules cover eighty of those, so you have forty credits of options. What are you considering? Well, I was looking at Climate Modelling, but I've heard it's quite mathematical. It is — it assumes you've done the statistics module in first year. Did you? I did, yes, I got a merit. Then you'd be fine. The alternative most students take is Environmental Policy, which is essay-based rather than quantitative. Is there any coursework in Climate Modelling? It's assessed by a project rather than an exam, which many students prefer. The deadline for changing your registration is the fourteenth of November, and you'll need to submit the form online through the student portal, not by email.",
+    "questions": [
+      {
+        "type": "gap",
+        "q": "How many credits does the student need in total for the year? (numbers only)",
+        "answer": "120",
+        "explanation": "'You need one hundred and twenty credits in total for the year.'",
+        "accept": ["120", "one hundred and twenty"]
+      },
+      {
+        "type": "gap",
+        "q": "How many credits of optional modules does the student have? (numbers only)",
+        "answer": "40",
+        "explanation": "Core modules cover 80 of the 120, leaving 40 credits of options.",
+        "accept": ["40", "forty"]
+      },
+      {
+        "type": "mc",
+        "q": "What does Climate Modelling assume students have already done?",
+        "options": [
+          "A first-year statistics module",
+          "A summer placement",
+          "An essay-writing course"
+        ],
+        "answer": 0,
+        "explanation": "'It assumes you've done the statistics module in first year.'"
+      },
+      {
+        "type": "mc",
+        "q": "How is Climate Modelling assessed?",
+        "options": ["By a written exam", "By a project", "By continuous assessment in class"],
+        "answer": 1,
+        "explanation": "'It's assessed by a project rather than an exam.'"
+      },
+      {
+        "type": "gap",
+        "q": "What is the deadline for changing registration? (write like: 14 November)",
+        "answer": "14 November",
+        "explanation": "The deadline is the fourteenth of November.",
+        "accept": ["14 november", "14th november", "november 14", "14/11"]
+      },
+      {
+        "type": "mc",
+        "q": "How must the form be submitted?",
+        "options": ["By email", "Online through the student portal", "In person at the office"],
+        "answer": 1,
+        "explanation": "'Submit the form online through the student portal, not by email.'"
+      }
+    ]
   }
 ]

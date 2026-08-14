@@ -6,14 +6,17 @@ progress tracking. Built with Python and [aiogram 3](https://docs.aiogram.dev/).
 
 ## Features
 
-| Section | What you get |
-|---|---|
-| 📖 **Reading** | Academic passages with auto-checked multiple-choice, true/false and gap-fill questions, each with an explanation. |
-| 🎧 **Listening** | Comprehension exercises delivered as a **voice clip** (synthesized with gTTS) or transcript, followed by questions. |
-| ✍️ **Writing** | Task 1 & Task 2 prompts with tips. Send your essay and get **examiner feedback** — AI-graded against the band descriptors if an Anthropic key is set, otherwise a built-in rule-based estimate. |
-| 🗣 **Speaking** | Parts 1–3 with cue cards and model tips. Reply by voice or text and get guidance. |
-| 🔤 **Vocabulary** | Flip-card decks for Band 7+ words and idioms. |
-| 📊 **Progress** | Per-section attempts and scores, stored in SQLite. |
+| Section | Bank | What you get |
+|---|---|---|
+| 📖 **Reading** | 6 passages · 33 questions | Academic passages with auto-checked questions, each with an explanation. |
+| 🎧 **Listening** | 6 exercises · 29 questions | Delivered as a **voice clip** (synthesized with gTTS) or transcript, followed by questions. |
+| ✍️ **Writing** | 8 tasks | Academic Task 1 & 2 plus a General Training letter. Send your essay and get **examiner feedback** — AI-graded against the band descriptors if an Anthropic key is set, otherwise a built-in rule-based estimate. |
+| 🗣 **Speaking** | 9 sets · 26 prompts | Parts 1–3 with cue cards and model tips. Reply by voice or text. |
+| 🔤 **Vocabulary** | 7 decks · 41 cards | Flip-card decks: trends language, linkers, topic vocabulary, idioms, phrasal verbs. |
+| 📊 **Progress** | — | Per-section attempts and scores, stored in SQLite. |
+
+**Question types supported:** multiple choice, TRUE/FALSE, TRUE/FALSE/NOT GIVEN,
+YES/NO/NOT GIVEN and gap fill (with a list of accepted answer variants).
 
 ## Quick start
 
@@ -45,6 +48,32 @@ Then open your bot in Telegram and send `/start`.
 - `gTTS` → real voice clips in the Listening section (falls back to transcript text otherwise).
 - `anthropic` → AI-graded Writing feedback.
 
+## Testing it without Telegram
+
+You do not need a bot token to check that everything works.
+
+```bash
+# 1. Validate every exercise file (ids, answer indexes, missing fields…)
+python scripts/validate_content.py
+
+# 2. See everything in the bank
+python scripts/demo.py
+
+# 3. Play an exercise in the terminal — same content and grading as the bot
+python scripts/demo.py reading r4
+python scripts/demo.py listening l3
+python scripts/demo.py writing w3
+python scripts/demo.py speaking s6
+python scripts/demo.py vocabulary v3
+
+# 4. Non-interactive self-test: answers each question with the declared
+#    correct answer and fails if any of them is not graded as correct
+python scripts/demo.py reading r4 --auto
+```
+
+Both scripts exit with a non-zero status on failure, so they can be dropped
+straight into CI.
+
 ## Project layout
 
 ```
@@ -62,6 +91,7 @@ app/
 │   └── vocabulary.json
 ├── services/
 │   ├── content.py     # loads/looks up exercises
+│   ├── grading.py     # answer checking (no aiogram — reusable & testable)
 │   ├── tts.py         # optional text-to-speech (gTTS)
 │   └── evaluation.py  # essay grading (AI or rule-based)
 └── handlers/          # one router per section
@@ -71,14 +101,29 @@ app/
     ├── vocabulary.py
     ├── progress.py
     └── common.py      # /start, /help, /cancel, fallback
+
+scripts/
+├── validate_content.py  # content integrity check (CI-friendly)
+└── demo.py              # play any exercise in the terminal
 ```
 
 ## Adding content
 
 Every exercise lives in a JSON file under `app/content/`. To add a Reading
 passage, append an object to `reading.json` with a unique `id`, a `passage`,
-and a `questions` list (`mc`, `tf` or `gap`). No code changes needed — the bot
-picks it up on restart.
+and a `questions` list. No code changes needed — the bot picks it up on restart.
+
+A question object looks like this:
+
+```jsonc
+{ "type": "mc",   "q": "…", "options": ["A","B","C"], "answer": 1, "explanation": "…" }
+{ "type": "tfng", "q": "…", "answer": "NOT GIVEN", "explanation": "…" }
+{ "type": "ynng", "q": "…", "answer": "NO", "explanation": "…" }
+{ "type": "gap",  "q": "…", "answer": "45", "accept": ["forty-five"], "explanation": "…" }
+```
+
+Run `python scripts/validate_content.py` after editing — it catches out-of-range
+answer indexes, illegal labels, duplicate ids and missing explanations.
 
 ## Notes
 

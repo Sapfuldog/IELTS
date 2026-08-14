@@ -12,6 +12,7 @@ from aiogram.types import BufferedInputFile, CallbackQuery, Message
 from app import keyboards as kb
 from app.db import Database
 from app.services import content, tts
+from app.services.grading import correct_answer_text, is_correct
 from app.states import Quiz
 
 router = Router(name="quiz")
@@ -107,19 +108,12 @@ async def _send_question(message: Message, state: FSMContext) -> None:
         await message.answer(header, reply_markup=kb.mc_options(q["options"]))
     elif q["type"] == "tf":
         await message.answer(header, reply_markup=kb.tf_options())
+    elif q["type"] == "tfng":
+        await message.answer(header, reply_markup=kb.tfng_options())
+    elif q["type"] == "ynng":
+        await message.answer(header, reply_markup=kb.ynng_options())
     else:  # gap fill
         await message.answer(header + "\n\n✏️ <i>Type your answer:</i>")
-
-
-def _is_correct(q: dict, given: str) -> bool:
-    if q["type"] == "mc":
-        return given.isdigit() and int(given) == q["answer"]
-    if q["type"] == "tf":
-        return given.upper() == str(q["answer"]).upper()
-    # gap
-    accepted = {str(q["answer"]).lower().strip()}
-    accepted.update(a.lower().strip() for a in q.get("accept", []))
-    return given.lower().strip() in accepted
 
 
 async def _grade(message: Message, state: FSMContext, db: Database, given: str) -> None:
@@ -128,11 +122,8 @@ async def _grade(message: Message, state: FSMContext, db: Database, given: str) 
     idx = data["q_index"]
     q = exercise["questions"][idx]
 
-    correct = _is_correct(q, given)
-    if q["type"] == "mc":
-        right = q["options"][q["answer"]]
-    else:
-        right = q["answer"]
+    correct = is_correct(q, given)
+    right = correct_answer_text(q)
 
     verdict = "✅ Correct!" if correct else f"❌ Not quite. Answer: <b>{right}</b>"
     explanation = q.get("explanation", "")

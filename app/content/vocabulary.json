@@ -20,5 +20,66 @@
       {"word": "a piece of cake", "definition": "something very easy", "example": "The Reading test was a piece of cake for me."},
       {"word": "to be on the same page", "definition": "to agree / share understanding", "example": "After the meeting we were all on the same page."}
     ]
+  },
+  {
+    "id": "v3",
+    "topic": "Task 1: Describing Trends",
+    "cards": [
+      {"word": "to rise steadily", "definition": "to increase at a constant, moderate rate", "example": "Sales rose steadily throughout the decade."},
+      {"word": "to plummet", "definition": "to fall very suddenly and steeply", "example": "Attendance plummeted after the ticket price doubled."},
+      {"word": "to level off / plateau", "definition": "to stop rising or falling and stay constant", "example": "Unemployment levelled off at around 6% after 2015."},
+      {"word": "to peak at", "definition": "to reach the highest point before declining", "example": "Production peaked at 40,000 units in 2008."},
+      {"word": "to fluctuate", "definition": "to rise and fall irregularly", "example": "Oil prices fluctuated wildly during the period."},
+      {"word": "a marginal increase", "definition": "a very small increase", "example": "There was a marginal increase in rural populations."},
+      {"word": "respectively", "definition": "in the order already mentioned", "example": "Spain and Italy accounted for 12% and 9% respectively."}
+    ]
+  },
+  {
+    "id": "v4",
+    "topic": "Linking Devices for Writing",
+    "cards": [
+      {"word": "nevertheless", "definition": "despite what was just said (formal 'however')", "example": "The policy was expensive; nevertheless, it proved effective."},
+      {"word": "furthermore", "definition": "in addition to what has been said", "example": "Furthermore, remote work reduces commuting emissions."},
+      {"word": "conversely", "definition": "in an opposite way", "example": "Urban birth rates fell; conversely, rural ones rose."},
+      {"word": "with regard to", "definition": "concerning; on the subject of", "example": "With regard to funding, opinions remain divided."},
+      {"word": "in light of", "definition": "considering; because of", "example": "In light of these findings, the policy was revised."},
+      {"word": "albeit", "definition": "although (used before an adjective or phrase)", "example": "The scheme succeeded, albeit at considerable cost."}
+    ]
+  },
+  {
+    "id": "v5",
+    "topic": "Topic: Environment",
+    "cards": [
+      {"word": "carbon footprint", "definition": "the total greenhouse gases produced by a person or activity", "example": "Flying less is the quickest way to cut your carbon footprint."},
+      {"word": "renewable energy", "definition": "energy from sources that are naturally replenished", "example": "The country now generates 40% of its power from renewable energy."},
+      {"word": "to mitigate", "definition": "to make something less severe", "example": "Planting trees can help mitigate the effects of flooding."},
+      {"word": "sustainable", "definition": "able to continue without damaging the environment", "example": "Sustainable farming protects soil for future generations."},
+      {"word": "depletion", "definition": "the reduction of a resource until it runs low", "example": "The depletion of fish stocks threatens coastal economies."},
+      {"word": "emissions", "definition": "gases released into the atmosphere", "example": "The tax is designed to reduce industrial emissions."}
+    ]
+  },
+  {
+    "id": "v6",
+    "topic": "Topic: Education & Work",
+    "cards": [
+      {"word": "to pursue a career", "definition": "to work towards a particular profession", "example": "She left banking to pursue a career in medicine."},
+      {"word": "vocational training", "definition": "training for a specific trade or job", "example": "Vocational training often leads to employment faster than a degree."},
+      {"word": "a well-rounded education", "definition": "an education covering a broad range of subjects", "example": "A well-rounded education develops more than exam skills."},
+      {"word": "job satisfaction", "definition": "the pleasure someone gets from their work", "example": "Many people value job satisfaction more highly than salary."},
+      {"word": "to broaden your horizons", "definition": "to widen your experience and understanding", "example": "Studying abroad really broadened my horizons."},
+      {"word": "transferable skills", "definition": "abilities useful in many different jobs", "example": "Teamwork and communication are transferable skills."}
+    ]
+  },
+  {
+    "id": "v7",
+    "topic": "Speaking: Useful Phrasal Verbs",
+    "cards": [
+      {"word": "to look up to (someone)", "definition": "to admire and respect", "example": "I've always looked up to my grandmother."},
+      {"word": "to take up (a hobby)", "definition": "to start doing something new", "example": "I took up photography during the pandemic."},
+      {"word": "to get by", "definition": "to manage, but only just", "example": "My French is basic, but I get by when I travel."},
+      {"word": "to come across (as)", "definition": "to give a particular impression", "example": "He comes across as shy, but he's very talkative once you know him."},
+      {"word": "to put off", "definition": "to postpone; to delay", "example": "I kept putting off my exam preparation until the last month."},
+      {"word": "to keep up with", "definition": "to stay level with; to stay informed about", "example": "It's hard to keep up with all the changes in technology."}
+    ]
   }
 ]

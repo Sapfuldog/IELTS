@@ -24,5 +24,83 @@
       "Group data logically and quote key figures.",
       "Aim for at least 150 words; use past tenses for past years."
     ]
+  },
+  {
+    "id": "w3",
+    "task": 2,
+    "title": "Free University Education",
+    "min_words": 250,
+    "prompt": "Some people think that university education should be free for all students, funded entirely by the government. Others believe that students should pay the full cost themselves.\n\nDiscuss both these views and give your own opinion.",
+    "tips": [
+      "This is a 'discuss both views' question — you must cover BOTH sides, then give your own view.",
+      "Do not leave your opinion until the conclusion only; state it in the introduction too.",
+      "Give one body paragraph to each view, and make sure they are balanced in length.",
+      "Useful phrases: 'Advocates of X argue that…', 'Those on the other side contend…'."
+    ]
+  },
+  {
+    "id": "w4",
+    "task": 2,
+    "title": "Environmental Responsibility",
+    "min_words": 250,
+    "prompt": "Some people say that protecting the environment is the responsibility of individuals, while others argue that only governments and large companies can make a real difference.\n\nDiscuss both views and give your own opinion.",
+    "tips": [
+      "Avoid listing many small ideas — two well-developed arguments score higher than five shallow ones.",
+      "Use concrete examples: recycling rates, carbon taxes, single-use plastic bans.",
+      "Topic vocabulary: emissions, sustainability, regulation, carbon footprint, incentives.",
+      "Make your position consistent from introduction to conclusion."
+    ]
+  },
+  {
+    "id": "w5",
+    "task": 2,
+    "title": "Crime: Punishment or Rehabilitation",
+    "min_words": 250,
+    "prompt": "Some people believe that the best way to reduce crime is to give longer prison sentences. Others think there are better alternatives, such as education and community programmes.\n\nDiscuss both views and give your own opinion.",
+    "tips": [
+      "Address the question asked — 'reduce crime' — not simply 'is prison good or bad'.",
+      "Consider deterrence, reoffending rates and the cost to taxpayers.",
+      "Topic vocabulary: deterrent, reoffending/recidivism, rehabilitation, custodial sentence.",
+      "Concede a point to the opposing side; this demonstrates a sophisticated argument."
+    ]
+  },
+  {
+    "id": "w6",
+    "task": 1,
+    "title": "Line Graph: Population Growth",
+    "min_words": 150,
+    "prompt": "The graph below shows the population of three cities — Ashford, Bellcastle and Corville — between 1980 and 2020, measured in thousands.\n\nSummarise the information by selecting and reporting the main features, and make comparisons where relevant. (Imagine: Ashford rises steadily from 120 to 340; Bellcastle peaks at 280 in 2000 then falls to 210; Corville stays almost flat at around 150 throughout.)",
+    "tips": [
+      "Your overview must state the big picture: which rose, which fell, which was stable.",
+      "Trend language: rose sharply, climbed steadily, peaked at, levelled off, declined gradually.",
+      "Always include units and the time frame ('in thousands', 'over the four decades').",
+      "Never speculate about WHY the trends happened — only describe what is shown."
+    ]
+  },
+  {
+    "id": "w7",
+    "task": 1,
+    "title": "Process Diagram: Water Treatment",
+    "min_words": 150,
+    "prompt": "The diagram below illustrates the process by which river water is treated to make it safe for drinking.\n\nSummarise the information by selecting and reporting the main features. (Imagine these stages: intake from river → screening to remove large debris → sedimentation tank → sand filtration → chlorination → storage reservoir → distribution to homes.)",
+    "tips": [
+      "Process diagrams need sequencing language, not trend language: first, next, subsequently, finally.",
+      "The passive voice is essential here: 'the water is screened', 'chlorine is added'.",
+      "Your overview should say how many stages there are and where the process begins and ends.",
+      "Do not add opinions or explanations that are not in the diagram."
+    ]
+  },
+  {
+    "id": "w8",
+    "task": 1,
+    "title": "General Training: Letter of Complaint",
+    "min_words": 150,
+    "prompt": "You recently bought a laptop from an online shop, but it arrived damaged and the shop has not replied to your emails.\n\nWrite a letter to the company's customer service manager. In your letter:\n- explain what you bought and when\n- describe the problem with the item\n- say what action you want the company to take\n\nBegin your letter 'Dear Sir or Madam,'. You do NOT need to write any addresses.",
+    "tips": [
+      "This is a formal letter: no contractions, no slang, and close with 'Yours faithfully' (since you don't know the name).",
+      "Cover all three bullet points — missing one caps your Task Achievement score.",
+      "State the action you want clearly and firmly but politely: 'I would therefore request a full refund.'",
+      "150 words minimum; a clear paragraph for each bullet works well."
+    ]
   }
 ]
