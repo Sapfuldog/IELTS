@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from aiogram import F, Router
+from aiogram.filters import Command, or_f
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
 
@@ -13,7 +14,7 @@ from app.states import Vocab
 router = Router(name="vocabulary")
 
 
-@router.message(F.text == kb.MENU_VOCAB)
+@router.message(or_f(Command("vocabulary"), F.text == kb.MENU_VOCAB))
 async def vocab_entry(message: Message, state: FSMContext) -> None:
     await state.clear()
     sets = content.get_all("vocabulary")

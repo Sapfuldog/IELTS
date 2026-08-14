@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from aiogram import F, Router
+from aiogram.filters import Command, or_f
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
 
@@ -15,7 +16,7 @@ from app.states import Writing
 router = Router(name="writing")
 
 
-@router.message(F.text == kb.MENU_WRITING)
+@router.message(or_f(Command("writing"), F.text == kb.MENU_WRITING))
 async def writing_entry(message: Message, state: FSMContext) -> None:
     await state.clear()
     tasks = content.get_all("writing")

@@ -10,7 +10,13 @@ from app import keyboards as kb
 from app.config import Config
 from app.db import Database
 
+# Global commands. Registered BEFORE the section routers so that /cancel and
+# friends still work while an exercise has the user in an FSM state — those
+# state handlers would otherwise swallow the command as an answer.
 router = Router(name="common")
+
+# The catch-all. Registered LAST, after every section router.
+fallback_router = Router(name="fallback")
 
 _WELCOME = (
     "👋 <b>Welcome to your IELTS prep coach!</b>\n\n"
@@ -26,12 +32,17 @@ _WELCOME = (
 
 _HELP = (
     "ℹ️ <b>How to use the bot</b>\n\n"
-    "• Choose a section from the menu.\n"
-    "• Reading/Listening: answer each question by tapping a button or typing.\n"
+    "Use the buttons under the message box, or these commands:\n"
+    "/reading — 📖 passages with questions\n"
+    "/listening — 🎧 audio with questions\n"
+    "/writing — ✍️ essay tasks with feedback\n"
+    "/speaking — 🗣 cue cards and questions\n"
+    "/vocabulary — 🔤 flashcards\n"
+    "/progress — 📊 your statistics\n"
+    "/cancel — stop the current exercise\n\n"
+    "• Reading/Listening: answer by tapping a button or typing.\n"
     "• Writing: send your essay as one message to get feedback.\n"
-    "• Speaking: reply to each prompt with a voice message or text.\n"
-    "• /cancel — stop the current exercise.\n"
-    "• /progress info is under the 📊 button.\n\n"
+    "• Speaking: reply to each prompt with a voice message or text.\n\n"
     "Tip: enable ANTHROPIC_API_KEY in .env for AI-graded Writing feedback."
 )
 
@@ -56,7 +67,7 @@ async def cmd_cancel(message: Message, state: FSMContext) -> None:
     await message.answer("Cancelled. Back to the menu.", reply_markup=kb.main_menu())
 
 
-@router.message()
+@fallback_router.message()
 async def fallback(message: Message) -> None:
     await message.answer(
         "I didn't catch that. Use the menu below or send /help.",

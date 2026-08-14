@@ -6,6 +6,7 @@ Listening additionally sends a synthesized voice clip (or the transcript).
 from __future__ import annotations
 
 from aiogram import F, Router
+from aiogram.filters import Command, or_f
 from aiogram.fsm.context import FSMContext
 from aiogram.types import BufferedInputFile, CallbackQuery, Message
 
@@ -30,13 +31,13 @@ async def open_section(message: Message, section: str) -> None:
     )
 
 
-@router.message(F.text == kb.MENU_READING)
+@router.message(or_f(Command("reading"), F.text == kb.MENU_READING))
 async def reading_entry(message: Message, state: FSMContext) -> None:
     await state.clear()
     await open_section(message, "reading")
 
 
-@router.message(F.text == kb.MENU_LISTENING)
+@router.message(or_f(Command("listening"), F.text == kb.MENU_LISTENING))
 async def listening_entry(message: Message, state: FSMContext) -> None:
     await state.clear()
     await open_section(message, "listening")

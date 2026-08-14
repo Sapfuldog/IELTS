@@ -41,6 +41,12 @@ async def _set_commands(bot: Bot) -> None:
     await bot.set_my_commands(
         [
             BotCommand(command="start", description="Start / show the menu"),
+            BotCommand(command="reading", description="📖 Reading practice"),
+            BotCommand(command="listening", description="🎧 Listening practice"),
+            BotCommand(command="writing", description="✍️ Writing tasks"),
+            BotCommand(command="speaking", description="🗣 Speaking practice"),
+            BotCommand(command="vocabulary", description="🔤 Vocabulary flashcards"),
+            BotCommand(command="progress", description="📊 Your progress"),
             BotCommand(command="help", description="How to use the bot"),
             BotCommand(command="cancel", description="Stop the current exercise"),
         ]

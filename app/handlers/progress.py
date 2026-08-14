@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from aiogram import F, Router
+from aiogram.filters import Command, or_f
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
@@ -19,7 +20,7 @@ _LABELS = {
 }
 
 
-@router.message(F.text == kb.MENU_PROGRESS)
+@router.message(or_f(Command("progress"), F.text == kb.MENU_PROGRESS))
 async def show_progress(message: Message, state: FSMContext, db: Database) -> None:
     await state.clear()
     stats = await db.stats_by_section(message.chat.id)

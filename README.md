@@ -18,6 +18,11 @@ progress tracking. Built with Python and [aiogram 3](https://docs.aiogram.dev/).
 **Question types supported:** multiple choice, TRUE/FALSE, TRUE/FALSE/NOT GIVEN,
 YES/NO/NOT GIVEN and gap fill (with a list of accepted answer variants).
 
+**Commands** — every section is reachable both from the menu buttons and by
+command: `/reading`, `/listening`, `/writing`, `/speaking`, `/vocabulary`,
+`/progress`, plus `/start`, `/help` and `/cancel`. Commands work even in the
+middle of an exercise.
+
 ## Quick start
 
 ```bash

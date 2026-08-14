@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from aiogram import F, Router
+from aiogram.filters import Command, or_f
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
 
@@ -13,7 +14,7 @@ from app.states import Speaking
 router = Router(name="speaking")
 
 
-@router.message(F.text == kb.MENU_SPEAKING)
+@router.message(or_f(Command("speaking"), F.text == kb.MENU_SPEAKING))
 async def speaking_entry(message: Message, state: FSMContext) -> None:
     await state.clear()
     exercises = content.get_all("speaking")
