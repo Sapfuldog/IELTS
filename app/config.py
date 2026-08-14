@@ -19,6 +19,7 @@ class Config:
     db_path: Path
     anthropic_api_key: str | None
     anthropic_model: str
+    telegram_proxy: str | None
 
     @property
     def ai_enabled(self) -> bool:
@@ -41,4 +42,5 @@ def load_config() -> Config:
         db_path=db_path,
         anthropic_api_key=os.getenv("ANTHROPIC_API_KEY", "").strip() or None,
         anthropic_model=os.getenv("ANTHROPIC_MODEL", "claude-sonnet-5").strip(),
+        telegram_proxy=os.getenv("TELEGRAM_PROXY", "").strip() or None,
     )

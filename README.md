@@ -43,6 +43,10 @@ Then open your bot in Telegram and send `/start`.
 | `ANTHROPIC_API_KEY` | — | Enables AI-graded Writing feedback. Without it a rule-based evaluator is used. |
 | `ANTHROPIC_MODEL` | — | Model for AI feedback (default `claude-sonnet-5`). |
 | `DB_PATH` | — | SQLite file path (default `data/ielts.db`). |
+| `TELEGRAM_PROXY` | — | Proxy for `api.telegram.org` if it is blocked on your network. Needs `pip install aiohttp-socks`. |
+
+If the bot cannot reach Telegram it exits with a clear message rather than a
+traceback, so a network problem is never mistaken for a bug in the code.
 
 **Optional extras** — install to unlock more:
 - `gTTS` → real voice clips in the Listening section (falls back to transcript text otherwise).

@@ -6,7 +6,9 @@ import logging
 
 from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
+from aiogram.client.session.aiohttp import AiohttpSession
 from aiogram.enums import ParseMode
+from aiogram.exceptions import TelegramNetworkError, TelegramUnauthorizedError
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.types import BotCommand
 
@@ -19,6 +21,20 @@ logging.basicConfig(
     format="%(asctime)s | %(levelname)-8s | %(name)s | %(message)s",
 )
 logger = logging.getLogger("ielts-bot")
+
+
+def _build_session(config) -> AiohttpSession | None:
+    """Custom session only when a proxy is configured."""
+    if not config.telegram_proxy:
+        return None
+    try:
+        return AiohttpSession(proxy=config.telegram_proxy)
+    except RuntimeError as exc:
+        # aiogram needs aiohttp-socks for proxied requests.
+        raise SystemExit(
+            f"❌ TELEGRAM_PROXY is set but proxy support is unavailable: {exc}\n"
+            "   Install it with:  pip install aiohttp-socks"
+        ) from None
 
 
 async def _set_commands(bot: Bot) -> None:
@@ -37,8 +53,10 @@ async def main() -> None:
     db = Database(config.db_path)
     await db.init()
 
+    session = _build_session(config)
     bot = Bot(
         token=config.bot_token,
+        session=session,
         default=DefaultBotProperties(parse_mode=ParseMode.HTML),
     )
     dp = Dispatcher(storage=MemoryStorage())
@@ -49,9 +67,32 @@ async def main() -> None:
 
     dp.include_router(build_router())
 
-    await _set_commands(bot)
-    logger.info("IELTS bot started (AI feedback: %s)", "on" if config.ai_enabled else "off")
+    try:
+        me = await bot.get_me()
+    except TelegramUnauthorizedError:
+        await bot.session.close()
+        raise SystemExit(
+            "❌ Telegram rejected the token.\n"
+            "   Check BOT_TOKEN in .env, or issue a new one with /newbot in @BotFather."
+        ) from None
+    except TelegramNetworkError as exc:
+        await bot.session.close()
+        raise SystemExit(
+            f"❌ Could not reach api.telegram.org ({exc.__class__.__name__}).\n"
+            "   The code is fine — this is a network problem. Check that:\n"
+            "   • this machine has internet access and Telegram is not blocked;\n"
+            "   • if you are behind a proxy, set TELEGRAM_PROXY in .env,\n"
+            "     e.g. TELEGRAM_PROXY=http://user:pass@host:port"
+        ) from None
 
+    logger.info(
+        "Started as @%s (id=%s) — AI feedback: %s",
+        me.username,
+        me.id,
+        "on" if config.ai_enabled else "off",
+    )
+
+    await _set_commands(bot)
     await bot.delete_webhook(drop_pending_updates=True)
     try:
         await dp.start_polling(bot)
@@ -62,5 +103,7 @@ async def main() -> None:
 if __name__ == "__main__":
     try:
         asyncio.run(main())
-    except (KeyboardInterrupt, SystemExit):
+    except KeyboardInterrupt:
         logger.info("Bot stopped.")
+    # SystemExit is intentionally not caught: startup failures must surface
+    # their message and a non-zero exit code.
