@@ -128,3 +128,21 @@ class TestMultiSelect:
 
     def test_the_correct_answer_reads_as_letters_and_text(self):
         assert correct_answer_text(self.Q) == "A. Cost + C. Safety"
+
+
+class TestWordBankGrading:
+    """A bank changes what is shown, not how the answer is judged."""
+
+    Q = {
+        "type": "gap", "answer": "waste", "accept": [],
+        "bank": ["waste", "fuel", "oxygen"],
+    }
+
+    def test_the_right_word_passes(self):
+        assert is_correct(self.Q, "waste")
+
+    def test_case_and_spacing_still_forgiven(self):
+        assert is_correct(self.Q, "  Waste ")
+
+    def test_another_word_from_the_bank_is_still_wrong(self):
+        assert not is_correct(self.Q, "fuel")

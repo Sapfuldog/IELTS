@@ -154,3 +154,41 @@ class TestMultiSelectShape:
     def test_too_few_options_is_rejected(self):
         q = {**self.BASE, "options": ["a", "b"], "answer": [0, 1]}
         assert any("at least 3 options" in p for p in validate_question(q))
+
+
+class TestWordBank:
+    """"Complete the summary using the list below" — the list must be usable."""
+
+    BASE = {
+        "type": "gap", "q": "Fluid removes metabolic ____.",
+        "answer": "waste", "accept": [], "explanation": "e",
+        "bank": ["waste", "fuel", "oxygen", "protein"],
+    }
+
+    def test_a_valid_bank_passes(self):
+        assert validate_question(self.BASE) == []
+
+    def test_a_gap_without_a_bank_is_still_fine(self):
+        q = {k: v for k, v in self.BASE.items() if k != "bank"}
+        assert validate_question(q) == []
+
+    def test_an_answer_outside_the_bank_is_rejected(self):
+        """Otherwise the question cannot be answered as posed."""
+        q = {**self.BASE, "answer": "rubbish"}
+        assert any("not among the words offered" in p for p in validate_question(q))
+
+    def test_the_answer_may_differ_in_case(self):
+        q = {**self.BASE, "answer": "Waste"}
+        assert validate_question(q) == []
+
+    def test_too_short_a_bank_is_rejected(self):
+        q = {**self.BASE, "bank": ["waste", "fuel"]}
+        assert any("at least 3 words" in p for p in validate_question(q))
+
+    def test_a_repeated_word_is_rejected(self):
+        q = {**self.BASE, "bank": ["waste", "fuel", "fuel", "oxygen"]}
+        assert any("repeats a word" in p for p in validate_question(q))
+
+    def test_an_empty_entry_is_rejected(self):
+        q = {**self.BASE, "bank": ["waste", "  ", "oxygen"]}
+        assert any("empty entry" in p for p in validate_question(q))

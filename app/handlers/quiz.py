@@ -18,7 +18,7 @@ from app import keyboards as kb
 from app.config import Config
 from app.db import Database
 from app.formatting import (
-    esc, multi_prompt, spoiler, split_message, translation_block,
+    esc, gap_prompt, multi_prompt, spoiler, split_message, translation_block,
 )
 from app.services import content, mistakes, tts
 from app.services.agent import TutorAgent
@@ -201,8 +201,8 @@ async def _send_question(message: Message, state: FSMContext) -> None:
         await message.answer(header, reply_markup=kb.ynng_options())
     elif q["type"] == "multi":
         await message.answer(f"{header}\n\n{multi_prompt(q)}")
-    else:  # gap fill
-        await message.answer(header + "\n\n✏️ <i>Type your answer:</i>")
+    else:  # gap fill, with a word bank when the question offers one
+        await message.answer(f"{header}\n\n{gap_prompt(q)}")
 
 
 async def _grade(message: Message, state: FSMContext, db: Database, given: str) -> None:

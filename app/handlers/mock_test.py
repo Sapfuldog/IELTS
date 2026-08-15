@@ -26,7 +26,7 @@ from aiogram.types import CallbackQuery, Message
 from app import keyboards as kb
 from app.config import Config
 from app.db import Database
-from app.formatting import esc, multi_prompt, split_message, spoiler
+from app.formatting import esc, gap_prompt, multi_prompt, split_message, spoiler
 from app.services import banding, content, mistakes
 from app.services.agent import TutorAgent
 from app.services.evaluation import evaluate_essay
@@ -277,7 +277,7 @@ async def _ask_question(message: Message, state: FSMContext) -> None:
     elif q["type"] == "multi":
         await message.answer(f"{header}\n\n{multi_prompt(q)}")
     else:
-        await message.answer(header + "\n\n✏️ <i>Type your answer:</i>")
+        await message.answer(f"{header}\n\n{gap_prompt(q)}")
 
 
 async def _record_answer(

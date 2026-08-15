@@ -20,6 +20,7 @@ from app.services.grading import (
     QUESTION_TYPES,
     is_correct,
     normalize_choice,
+    normalize_gap,
 )
 
 # Words too common to say anything about which option an explanation means.
@@ -69,6 +70,32 @@ def check_key_against_explanation(question: dict) -> str | None:
         f"{options[best]!r} — the answer index looks wrong"
     )
 
+def _check_word_bank(q: dict, where: str) -> list[str]:
+    """A gap question may offer a list of words to choose from.
+
+    Real papers phrase this as "complete the summary using the list below",
+    and the list is what makes the task gradeable — without it a learner can
+    write any synonym. The one thing that must hold is that the answer is
+    actually in the list, or the question is unanswerable as posed.
+    """
+    bank = q.get("bank")
+    if bank is None:
+        return []
+    if not isinstance(bank, list) or len(bank) < 3:
+        return [f"{where}: 'bank' must be a list of at least 3 words"]
+    if any(not str(word).strip() for word in bank):
+        return [f"{where}: empty entry in 'bank'"]
+
+    offered = {normalize_gap(word) for word in bank}
+    if normalize_gap(q["answer"]) not in offered:
+        return [
+            f"{where}: the answer {q['answer']!r} is not among the words offered"
+        ]
+    if len(offered) < len(bank):
+        return [f"{where}: 'bank' repeats a word"]
+    return []
+
+
 QUIZ_SECTIONS = {"reading": "passage", "listening": "audio_text"}
 
 
@@ -117,6 +144,7 @@ def validate_question(q: dict, where: str = "question") -> list[str]:
         for variant in q.get("accept", []):
             if not str(variant).strip():
                 problems.append(f"{where}: empty string in 'accept' list")
+        problems += _check_word_bank(q, where)
 
     if not q.get("explanation"):
         problems.append(f"{where}: missing explanation (shown after answering)")

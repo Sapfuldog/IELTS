@@ -87,9 +87,12 @@ _GAP_QUESTION = {
         "q": {"type": "string"},
         "answer": {"type": "string"},
         "accept": {"type": "array", "items": {"type": "string"}},
+        # Optional word bank: empty means the learner supplies the word from
+        # the text, non-empty turns it into "choose from the list below".
+        "bank": {"type": "array", "items": {"type": "string"}},
         "explanation": {"type": "string"},
     },
-    "required": ["type", "q", "answer", "accept", "explanation"],
+    "required": ["type", "q", "answer", "accept", "bank", "explanation"],
     "additionalProperties": False,
 }
 

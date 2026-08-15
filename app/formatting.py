@@ -59,6 +59,19 @@ def split_message(text: str, limit: int = TELEGRAM_LIMIT) -> list[str]:
 MULTI_LETTERS = "ABCDEFGH"
 
 
+def gap_prompt(question: dict) -> str:
+    """The typing instruction, with the word bank when the question offers one.
+
+    Without the list on screen a learner has to guess the exact wording; with
+    it the task is the one a real paper sets.
+    """
+    bank = question.get("bank")
+    if not bank:
+        return "✏️ <i>Type your answer:</i>"
+    words = "   ".join(f"<code>{esc(word)}</code>" for word in bank)
+    return f"{words}\n\n✏️ <i>Type one word from the list above:</i>"
+
+
 def multi_prompt(question: dict) -> str:
     """Lettered options plus the instruction, for a choose-several question.
 
