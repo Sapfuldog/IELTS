@@ -40,10 +40,10 @@ async def start_speaking(call: CallbackQuery, state: FSMContext) -> None:
     await state.set_state(Speaking.answering)
     await state.update_data(exercise_id=exercise_id, q_index=0, given=[])
 
-    await call.message.answer(
-        f"🗣 <b>Part {exercise['part']}: {esc(exercise['topic'])}</b>\n\n"
-        f"<i>{esc(exercise['intro'])}</i>"
-    )
+    intro = f"🗣 <b>Part {exercise['part']}: {esc(exercise['topic'])}</b>\n\n<i>{esc(exercise['intro'])}</i>"
+    if exercise.get("intro_ru"):
+        intro += f"\n🇷🇺 {spoiler(exercise['intro_ru'])}"
+    await call.message.answer(intro)
     if exercise.get("cue_card"):
         text = f"🃏 <b>Cue card</b>\n\n{esc(exercise['cue_card'])}"
         if exercise.get("cue_card_translation"):
@@ -177,7 +177,16 @@ async def receive_answer(
     band = await _band_for_set(
         message, exercise, given, config, db, message.chat.id
     )
-    tips = "\n".join(f"• {esc(t)}" for t in exercise.get("tips", []))
+    # Each tip carries its Russian under a spoiler: advice a learner cannot
+    # read is advice they cannot act on, but showing it unasked removes the
+    # reading practice the English gives them.
+    russian = exercise.get("tips_ru") or []
+    tip_lines = []
+    for i, tip in enumerate(exercise.get("tips", [])):
+        tip_lines.append(f"• {esc(tip)}")
+        if i < len(russian):
+            tip_lines.append(f"   {spoiler(russian[i])}")
+    tips = "\n".join(tip_lines)
     await db.save_result(
         user_id=message.chat.id,
         section="speaking",
