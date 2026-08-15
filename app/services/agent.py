@@ -227,6 +227,20 @@ _BRIEFS = {
     ),
 }
 
+# What actually separates a band 6 text from a band 8 one, so the brief can ask
+# for a level instead of hoping the model picks one.
+_BAND_GUIDANCE = {
+    5: "everyday vocabulary and short simple sentences; answers stated almost "
+       "word for word in the text",
+    6: "some less common vocabulary and a mix of sentence lengths; answers "
+       "stated clearly but paraphrased",
+    7: "topic-specific and abstract vocabulary, longer sentences with "
+       "subordinate clauses; answers require combining two statements",
+    8: "dense academic register, idiomatic and figurative language; answers "
+       "require inference across paragraphs and distinguishing close "
+       "distractors",
+}
+
 _SYSTEM = (
     "You are an experienced IELTS materials writer. You produce practice "
     "content that is accurate, unambiguous and pitched at the requested CEFR "
@@ -500,6 +514,7 @@ class TutorAgent:
         level: str = "B2",
         questions: int = 5,
         part: int | None = None,
+        target_band: int | None = None,
     ) -> dict | None:
         """Produce one validated exercise, or None if it could not be made."""
         if not self.available:
@@ -509,6 +524,11 @@ class TutorAgent:
 
         brief = _BRIEFS[section].format(topic=topic, n=questions)
         prompt = f"{brief}\n\nCEFR level: {level}."
+        if target_band and section in ("reading", "listening"):
+            prompt += (
+                f"\nPitch it at IELTS band {target_band}: "
+                f"{_BAND_GUIDANCE[target_band]}. Set 'target_band' to {target_band}."
+            )
         if part is not None:
             prompt += f"\nThis must be Part {part}."
 

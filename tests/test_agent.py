@@ -229,3 +229,41 @@ class TestRefusedAndEmptyAnswers:
         from app.services.agent import MARKING_TOKENS
 
         assert MARKING_TOKENS >= 8000
+
+
+class TestBandTargeting:
+    """Generation can be aimed at a band, not just a CEFR level."""
+
+    async def test_the_target_reaches_the_prompt_with_its_description(self, agent_config):
+        agent = TutorAgent(agent_config)
+        calls = stub(agent, FIXED)
+        await agent.generate("reading", target_band=8)
+        assert "band 8" in calls[0]
+        assert "inference across paragraphs" in calls[0]
+
+    async def test_bands_ask_for_different_material(self, agent_config):
+        agent = TutorAgent(agent_config)
+        easy = stub(agent, FIXED)
+        await agent.generate("reading", target_band=5)
+        agent2 = TutorAgent(agent_config)
+        hard = stub(agent2, FIXED)
+        await agent2.generate("reading", target_band=8)
+        assert easy[0] != hard[0]
+        assert "word for word" in easy[0]
+
+    async def test_no_target_leaves_the_prompt_alone(self, agent_config):
+        agent = TutorAgent(agent_config)
+        calls = stub(agent, FIXED)
+        await agent.generate("reading")
+        assert "Pitch it at IELTS band" not in calls[0]
+
+    async def test_speaking_is_not_band_targeted(self, agent_config):
+        """Only the quiz sections have a passage whose difficulty can be aimed."""
+        agent = TutorAgent(agent_config)
+        calls = stub(agent, {
+            "topic": "T", "part": 1, "intro": "i", "cue_card": "",
+            "cue_card_translation": "", "questions": ["Q?"],
+            "questions_translation": ["В?"], "tips": ["t"],
+        })
+        await agent.generate("speaking", target_band=8)
+        assert "Pitch it at IELTS band" not in calls[0]
