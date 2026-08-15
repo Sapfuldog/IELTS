@@ -94,6 +94,20 @@ def get_exercise(section: str, exercise_id: str) -> dict | None:
     return None
 
 
+def grammar_syllabus() -> list[dict]:
+    """The grammar points worth covering, ordered easiest first.
+
+    A syllabus rather than borrowed material. Open textbooks would have to be
+    ingested under their licences — CC BY-SA obliges every derived exercise to
+    carry share-alike, and the NC variants foreclose a paid tier for good —
+    and none of that buys much, because the value of a grammar book here is
+    its coverage, not its prose. Which points exist and in what order is
+    ordinary factual structure, and the material is written fresh against it.
+    """
+    with (CONTENT_DIR / "syllabus.json").open(encoding="utf-8") as fh:
+        return json.load(fh)["grammar"]
+
+
 def count(section: str) -> tuple[int, int]:
     """(total, generated) — used by the menus to show how the bank is growing."""
     items = _load(section)

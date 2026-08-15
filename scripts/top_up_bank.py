@@ -49,7 +49,8 @@ def questions_in(section: str) -> int:
 
 async def top_up(agent: TutorAgent, section: str, target: int) -> bool:
     have = questions_in(section)
-    print(f"\n{section}: {have} questions, target {target}")
+    unit = "cards" if section == "vocabulary" else "questions"
+    print(f"\n{section}: {have} {unit}, target {target}")
     if have >= target:
         print("  already there")
         return True
@@ -57,8 +58,15 @@ async def top_up(agent: TutorAgent, section: str, target: int) -> bool:
     failures = 0
     while have < target and failures < MAX_CONSECUTIVE_FAILURES:
         topic = random.choice(TOPICS)
-        print(f"  writing one on {topic!r}…", end=" ", flush=True)
-        exercise = await agent.generate(section, topic=topic, questions=6)
+        # Grammar coverage is driven by the syllabus rather than left to
+        # chance: drawing topics at random leaves whole areas untouched while
+        # repeating others, and a learner cannot tell what they have not met.
+        point = random.choice(content.grammar_syllabus())
+        print(f"  writing one on {topic!r} ({point['topic']})…", end=" ", flush=True)
+        exercise = await agent.generate(
+            section, topic=topic, questions=6,
+            target_band=point["band"], grammar=point,
+        )
 
         if exercise is None:
             failures += 1

@@ -64,3 +64,39 @@ class TestDescription:
         text = flag([row(0.0, attempts=12, q_index=3)])[0].describe()
         assert "reading/r1 Q4" in text  # one-based for humans
         assert "12 answers" in text
+
+
+class TestSyllabus:
+    """Grammar coverage is planned, not left to chance."""
+
+    def syllabus(self):
+        from app.services import content
+
+        return content.grammar_syllabus()
+
+    def test_it_spans_the_bands(self):
+        bands = {p["band"] for p in self.syllabus()}
+        assert bands == {5, 6, 7, 8}, "a learner at any level needs points to meet"
+
+    def test_every_point_says_what_to_look_for(self):
+        missing = [p["id"] for p in self.syllabus() if not p.get("focus")]
+        assert missing == [], f"no focus: {missing}"
+
+    def test_ids_are_unique(self):
+        ids = [p["id"] for p in self.syllabus()]
+        assert len(ids) == len(set(ids))
+
+    async def test_the_point_reaches_the_prompt_without_becoming_the_lesson(
+        self, agent_config
+    ):
+        from app.services.agent import TutorAgent
+        from test_agent import FIXED, stub
+
+        agent = TutorAgent(agent_config)
+        calls = stub(agent, FIXED)
+        point = {"topic": "Inversion", "focus": "not only, rarely", "band": 8}
+        await agent.generate("reading", grammar=point)
+
+        assert "Inversion" in calls[0]
+        # An exercise announcing its grammar is a drill, not an IELTS task.
+        assert "Do not explain it" in calls[0]

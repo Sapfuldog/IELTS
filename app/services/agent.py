@@ -280,7 +280,9 @@ _BRIEFS = {
         "'match' question per paragraph ('Paragraph A', 'Paragraph B', …) "
         "whose 'answer' is that heading's exact text. Every heading must be a "
         "plausible fit for some paragraph — headings nothing could match are "
-        "not distractors, they are padding."
+        "not distractors, they are padding.\n"
+        "Leave 'diagram' empty: title an empty string and steps an empty "
+        "list. A diagram belongs with a spoken process, not a reading passage."
     ),
     "listening": (
         "Write one IELTS Listening practice exercise: a 150-250 word spoken "
@@ -641,6 +643,7 @@ class TutorAgent:
         questions: int = 5,
         part: int | None = None,
         target_band: int | None = None,
+        grammar: dict | None = None,
     ) -> dict | None:
         """Produce one validated exercise, or None if it could not be made."""
         if not self.available:
@@ -654,6 +657,15 @@ class TutorAgent:
             prompt += (
                 f"\nPitch it at IELTS band {target_band}: "
                 f"{_BAND_GUIDANCE[target_band]}. Set 'target_band' to {target_band}."
+            )
+        if grammar and section in ("reading", "listening", "writing"):
+            # The point is met in use, not taught. An exercise announcing its
+            # grammar becomes a grammar drill, which is not what IELTS tests.
+            prompt += (
+                f"\nWork the text naturally around this grammar point so the "
+                f"learner meets it in use: {grammar['topic']} — "
+                f"{grammar['focus']}. Do not explain it and do not make the "
+                f"questions about it; it should simply be there."
             )
         if part is not None:
             prompt += f"\nThis must be Part {part}."
