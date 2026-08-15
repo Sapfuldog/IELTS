@@ -9,7 +9,7 @@ from aiogram.types import CallbackQuery, Message
 from app import keyboards as kb
 from app.config import Config
 from app.db import Database
-from app.formatting import esc, translation_block, split_message
+from app.formatting import esc, spoiler, split_message, translation_block
 from app.services import content, mistakes
 from app.services.agent import TutorAgent
 from app.services.evaluation import evaluate_essay
@@ -40,15 +40,38 @@ async def start_task(call: CallbackQuery, state: FSMContext) -> None:
     await state.set_state(Writing.awaiting_essay)
     await state.update_data(task_id=task_id)
 
+    lines = [
+        f"✍️ <b>Writing Task {task['task']}: {esc(task['title'])}</b>",
+        f"<i>Minimum {task['min_words']} words.</i>",
+        "",
+        esc(task["prompt"]),
+    ]
+    # The instruction is set apart from the situation on purpose: answering the
+    # topic instead of the question is what costs marks under Task Achievement.
+    if task.get("question"):
+        lines += ["", f"<b>❓ {esc(task['question'])}</b>"]
+        if task.get("question_ru"):
+            lines.append(f"🇷🇺 {spoiler(task['question_ru'])}")
+
+    if task.get("must_cover"):
+        lines += ["", "<b>A complete answer must cover</b>"]
+        russian = task.get("must_cover_ru") or []
+        for i, point in enumerate(task["must_cover"]):
+            lines.append(f"▫️ {esc(point)}")
+            if i < len(russian):
+                lines.append(f"    {spoiler(russian[i])}")
+
     tips = "\n".join(f"• {esc(t)}" for t in task.get("tips", []))
-    await call.message.answer(
-        f"✍️ <b>Writing Task {task['task']}: {esc(task['title'])}</b>\n"
-        f"<i>Minimum {task['min_words']} words.</i>\n\n"
-        f"{esc(task['prompt'])}\n\n"
-        f"<b>Tips</b>\n{tips}\n\n"
+    lines += [
+        "",
+        f"<b>Tips</b>\n{tips}",
+        "",
         "When you're ready, send your full answer as one message. "
-        "Send /cancel to stop."
-    )
+        "Send /cancel to stop.",
+    ]
+    for chunk in split_message("\n".join(lines)):
+        await call.message.answer(chunk)
+
     if task.get("translation"):
         await call.message.answer(translation_block(task["translation"]))
 

@@ -284,6 +284,37 @@ def validate_question(q: dict, where: str = "question") -> list[str]:
     return problems
 
 
+def _check_task_one_data(exercise: dict) -> list[str]:
+    """Task 1 asks the candidate to describe data, so the data must be there.
+
+    A real paper prints a chart. The bot cannot, so the figures have to be in
+    the prompt as text. Left to a brief alone the model writes "the table
+    below shows…" and then shows nothing, producing a task that cannot be
+    answered — the check belongs here, where it is enforced rather than asked.
+    """
+    if exercise.get("task") != 1:
+        return []
+    prompt = str(exercise.get("prompt", ""))
+
+    # General Training Task 1 is a letter and has no data at all, so the rule
+    # only applies where the prompt claims to present something visual.
+    visual = re.search(
+        r"\b(chart|graph|table|diagram|map|plan|figure|illustrat)\w*", prompt, re.I
+    )
+    if not visual:
+        return []
+
+    if re.search(r"\b(below|above|following|shown)\b", prompt, re.I) and len(
+        re.findall(r"\d+", prompt)
+    ) < 4:
+        return [
+            f"writing: the prompt points at a {visual.group(0).lower()} the bot "
+            "cannot show. Put the figures in the prompt as text, or use a "
+            "process that can be described in words"
+        ]
+    return []
+
+
 def _check_tips(section: str, exercise: dict) -> list[str]:
     """Tips must be a list of strings — the handlers bullet them one by one.
 
@@ -332,6 +363,7 @@ def validate_exercise(section: str, exercise: dict) -> list[str]:
                 problems.append(f"writing: missing '{field}'")
         if exercise.get("task") not in (1, 2):
             problems.append("writing: 'task' must be 1 or 2")
+        problems += _check_task_one_data(exercise)
         problems += _check_tips("writing", exercise)
 
     elif section == "speaking":

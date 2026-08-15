@@ -188,12 +188,24 @@ _WRITING_SCHEMA = {
         "title": {"type": "string"},
         "task": {"enum": [1, 2]},
         "prompt": {"type": "string"},
+        # The instruction proper, split out from the situation: a candidate who
+        # answers the topic instead of the question loses marks under Task
+        # Achievement no matter how well they write.
+        "question": {"type": "string"},
+        "question_ru": {"type": "string"},
+        # What a complete answer has to address — the difference between a
+        # tidy essay and one that scores.
+        "must_cover": {"type": "array", "items": {"type": "string"}},
+        "must_cover_ru": {"type": "array", "items": {"type": "string"}},
         "min_words": {"type": "integer"},
         # The handlers bullet these, so tips is a list, never one blob of text.
         "tips": {"type": "array", "items": {"type": "string"}},
         "translation": {"type": "string"},
     },
-    "required": ["title", "task", "prompt", "min_words", "tips", "translation"],
+    "required": [
+        "title", "task", "prompt", "question", "question_ru",
+        "must_cover", "must_cover_ru", "min_words", "tips", "translation",
+    ],
     "additionalProperties": False,
 }
 
@@ -289,10 +301,21 @@ _BRIEFS = {
         "which a spoken script does not have."
     ),
     "writing": (
-        "Write one IELTS Writing task on {topic}. Task 1 describes visual "
-        "data in at least 150 words; Task 2 argues a position in at least "
-        "250 words. 'tips' is 2-3 separate pieces of concrete advice for "
-        "this specific prompt, one per list entry."
+        "Write one IELTS Writing task on {topic}. Task 2 argues a position in "
+        "at least 250 words. Task 1 describes data in at least 150 words — "
+        "and the bot cannot show a picture, so never write 'the chart below': "
+        "put the figures in the prompt itself as a short text table the "
+        "candidate can read, or choose a process the data can be stated in "
+        "words. A task referring to a chart nobody can see cannot be answered "
+        "at all. 'tips' is 2-3 separate pieces of concrete advice for "
+        "this specific prompt, one per list entry.\n"
+        "Split the task in two: 'prompt' sets out the situation or the "
+        "statement, 'question' is the instruction the candidate must answer "
+        "in the words a real paper would use (e.g. 'Discuss both views and "
+        "give your own opinion.'). 'must_cover' lists 2-4 things a complete "
+        "answer has to address — answering the topic rather than the question "
+        "is what costs marks under Task Achievement. Fill 'question_ru' and "
+        "'must_cover_ru' with the Russian versions, entry for entry."
     ),
     "vocabulary": (
         "Write one IELTS vocabulary deck of {n} words on {topic}. Draw from "

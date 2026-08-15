@@ -325,3 +325,43 @@ class TestGroupExpansion:
         raw["questions"][0]["group"] = "typo"
         ex = expand_groups(raw)
         assert "options" not in ex["questions"][0]  # the validator reports it
+
+
+class TestTaskOneData:
+    """Task 1 describes data the bot cannot draw, so the data must be in words."""
+
+    def make(self, prompt, task=1):
+        return {
+            "id": "w1", "title": "T", "prompt": prompt, "min_words": 150,
+            "task": task, "tips": ["t"],
+        }
+
+    def test_a_prompt_carrying_its_figures_passes(self):
+        ex = self.make(
+            "The table shows ownership.\nCar 52% 61% 64%\nTV 88% 94% 91%"
+        )
+        assert validate_exercise("writing", ex) == []
+
+    def test_pointing_at_an_unseen_chart_is_rejected(self):
+        ex = self.make("The chart below shows car ownership from 2000 to 2020.")
+        assert any("cannot show" in p for p in validate_exercise("writing", ex))
+
+    def test_a_letter_task_needs_no_figures(self):
+        """General Training Task 1 is a letter — the rule must not fire."""
+        ex = self.make(
+            "You recently bought a laptop that arrived damaged. Write a letter "
+            "to the shop explaining what happened."
+        )
+        assert validate_exercise("writing", ex) == []
+
+    def test_task_two_is_never_checked_for_data(self):
+        ex = self.make("Some people think the chart below is misleading.", task=2)
+        ex["min_words"] = 250
+        assert validate_exercise("writing", ex) == []
+
+    def test_a_process_described_in_words_passes(self):
+        ex = self.make(
+            "The stages below describe water treatment.\n1. Intake\n2. Screening\n"
+            "3. Sedimentation\n4. Filtration"
+        )
+        assert validate_exercise("writing", ex) == []
