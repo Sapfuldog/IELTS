@@ -110,8 +110,40 @@ _MULTI_QUESTION = {
     "additionalProperties": False,
 }
 
+# Matching formats: the option list lives on the exercise and questions point
+# at it by id. `answer` is again the option's exact text, resolved to an index
+# by _resolve_answer once app.services.content has expanded the group.
+_MATCH_QUESTION = {
+    "type": "object",
+    "properties": {
+        "type": {"enum": ["match"]},
+        "q": {"type": "string"},
+        "group": {"type": "string"},
+        "answer": {"type": "string"},
+        "explanation": {"type": "string"},
+    },
+    "required": ["type", "q", "group", "answer", "explanation"],
+    "additionalProperties": False,
+}
+
+_GROUP = {
+    "type": "object",
+    "properties": {
+        "id": {"type": "string"},
+        "prompt": {"type": "string"},
+        "options": {"type": "array", "items": {"type": "string"}},
+        # True for headings — one per paragraph, no reuse.
+        "exhaustive": {"type": "boolean"},
+    },
+    "required": ["id", "prompt", "options", "exhaustive"],
+    "additionalProperties": False,
+}
+
 _QUESTION = {
-    "anyOf": [_MC_QUESTION, _CHOICE_QUESTION, _GAP_QUESTION, _MULTI_QUESTION]
+    "anyOf": [
+        _MC_QUESTION, _CHOICE_QUESTION, _GAP_QUESTION, _MULTI_QUESTION,
+        _MATCH_QUESTION,
+    ]
 }
 
 
@@ -126,10 +158,12 @@ def _quiz_schema(body_field: str) -> dict:
             "target_band": {"enum": [5, 6, 7, 8]},
             body_field: {"type": "string"},
             "translation": {"type": "string"},
+            "groups": {"type": "array", "items": _GROUP},
             "questions": {"type": "array", "items": _QUESTION},
         },
         "required": [
-            "title", "level", "target_band", body_field, "translation", "questions",
+            "title", "level", "target_band", body_field, "translation",
+            "groups", "questions",
         ],
         "additionalProperties": False,
     }
@@ -214,7 +248,14 @@ _BRIEFS = {
         "Include one 'multi' question (choose TWO of 4-5 options; 'answer' "
         "lists both correct option texts) and one 'gap' with a 'bank' of 4-6 "
         "candidate words, one of which is the answer. Leave 'bank' empty on "
-        "any other gap question."
+        "any other gap question.\n"
+        "Write the passage in clearly separated paragraphs and add a matching "
+        "task: one entry in 'groups' with id 'headings', exhaustive true, and "
+        "two more headings than there are paragraphs you ask about, then one "
+        "'match' question per paragraph ('Paragraph A', 'Paragraph B', …) "
+        "whose 'answer' is that heading's exact text. Every heading must be a "
+        "plausible fit for some paragraph — headings nothing could match are "
+        "not distractors, they are padding."
     ),
     "listening": (
         "Write one IELTS Listening practice exercise: a 150-250 word spoken "
@@ -628,7 +669,7 @@ class TutorAgent:
             # Speaking sets hold plain strings here, not question objects.
             if not isinstance(question, dict):
                 continue
-            if question.get("type") not in ("mc", "multi"):
+            if question.get("type") not in ("mc", "multi", "match"):
                 continue
             question["options"] = [
                 _strip_label(option) for option in question.get("options", [])
@@ -639,6 +680,11 @@ class TutorAgent:
     def _finalise(section: str, payload: dict, level: str) -> dict:
         """Add the fields the bot needs but the model should not invent."""
         exercise = dict(payload)
+        # Expand before anything looks at the questions: a `match` question has
+        # no options of its own until the group is resolved onto it.
+        from app.services.content import expand_groups
+
+        expand_groups(exercise)
         TutorAgent._clean_options(exercise)
         exercise["id"] = f"gen-{section[0]}{uuid.uuid4().hex[:8]}"
         if section == "vocabulary":
