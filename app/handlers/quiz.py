@@ -5,17 +5,25 @@ Listening additionally sends a synthesized voice clip (or the transcript).
 """
 from __future__ import annotations
 
+import logging
+import random
+
 from aiogram import F, Router
+from aiogram.exceptions import TelegramAPIError
 from aiogram.filters import Command, or_f
 from aiogram.fsm.context import FSMContext
 from aiogram.types import BufferedInputFile, CallbackQuery, Message
 
 from app import keyboards as kb
+from app.config import Config
 from app.db import Database
 from app.formatting import esc, spoiler, split_message, translation_block
-from app.services import content, tts
+from app.services import content, mistakes, tts
+from app.services.agent import TutorAgent
 from app.services.grading import correct_answer_text, is_correct
 from app.states import Quiz
+
+logger = logging.getLogger(__name__)
 
 router = Router(name="quiz")
 
@@ -24,24 +32,58 @@ _SECTION_TITLES = {"reading": "📖 Reading", "listening": "🎧 Listening"}
 
 # --- Section entry: show the list of exercises ----------------------------
 
-async def open_section(message: Message, section: str) -> None:
+async def open_section(message: Message, section: str, config: Config) -> None:
     exercises = content.get_all(section)
+    total, generated = content.count(section)
+    suffix = f" ({total}, {generated} written for you)" if generated else f" ({total})"
     await message.answer(
-        f"{_SECTION_TITLES[section]} — choose an exercise:",
-        reply_markup=kb.exercise_list(section, exercises),
+        f"{_SECTION_TITLES[section]}{suffix} — choose an exercise:",
+        reply_markup=kb.exercise_list(
+            section, exercises, can_generate=TutorAgent(config).available
+        ),
     )
 
 
+_TOPICS = [
+    "city life", "work and careers", "the environment", "technology",
+    "education", "health and fitness", "travel", "food and cooking",
+    "science", "art and culture", "money and shopping", "sport",
+]
+
+
+@router.callback_query(F.data.startswith("gen:"))
+async def generate_exercise(call: CallbackQuery, config: Config) -> None:
+    """Write a brand-new exercise and add it to the bank for good."""
+    section = call.data.split(":", 1)[1]
+    await call.answer("Writing a new exercise…")
+    notice = await call.message.answer(
+        f"✨ Writing a new {section} exercise — this takes 20–40 seconds…"
+    )
+
+    agent = TutorAgent(config)
+    exercise = await agent.generate(section, topic=random.choice(_TOPICS))
+    if exercise is None:
+        await notice.edit_text(
+            "❌ Could not write a new exercise just now — the existing ones are "
+            "still there. Check the bot log for the reason."
+        )
+        return
+
+    content.add_generated(section, exercise)
+    await notice.edit_text(f"✅ Added: <b>{esc(exercise['title'])}</b>")
+    await open_section(call.message, section, config)
+
+
 @router.message(or_f(Command("reading"), F.text == kb.MENU_READING))
-async def reading_entry(message: Message, state: FSMContext) -> None:
+async def reading_entry(message: Message, state: FSMContext, config: Config) -> None:
     await state.clear()
-    await open_section(message, "reading")
+    await open_section(message, "reading", config)
 
 
 @router.message(or_f(Command("listening"), F.text == kb.MENU_LISTENING))
-async def listening_entry(message: Message, state: FSMContext) -> None:
+async def listening_entry(message: Message, state: FSMContext, config: Config) -> None:
     await state.clear()
-    await open_section(message, "listening")
+    await open_section(message, "listening", config)
 
 
 # --- Start a chosen exercise ----------------------------------------------
@@ -96,26 +138,45 @@ async def _send_reading(message: Message, exercise: dict) -> None:
 
 async def _send_listening(message: Message, exercise: dict) -> None:
     audio_text = exercise["audio_text"]
-    path = await tts.synthesize(audio_text)
-    if path is not None:
-        with path.open("rb") as fh:
-            voice = BufferedInputFile(fh.read(), filename="clip.mp3")
-        await message.answer_voice(
-            voice,
-            caption="🎧 Listen carefully. You can replay it before answering.",
-        )
+    if await _send_clip(message, audio_text):
         # The script would hand over the answers, so it stays hidden too —
         # available for checking, but only once the learner chooses to look.
         for chunk in split_message(audio_text):
             await message.answer(f"📄 <i>Скрипт (нажмите, чтобы открыть)</i>\n{spoiler(chunk)}")
     else:
         await message.answer(
-            "🎧 <i>(Audio unavailable — read the transcript instead. "
-            "Install gTTS to hear it as speech.)</i>"
+            "🎧 <i>(Audio unavailable — read the transcript instead.)</i>"
         )
         for chunk in split_message(audio_text):
             await message.answer(esc(chunk))
     await _send_translation(message, exercise)
+
+
+async def _send_clip(message: Message, audio_text: str) -> bool:
+    """Send the synthesized clip. False means the caller should fall back to text.
+
+    A clip that cannot be produced or delivered must not cost the learner the
+    whole exercise: letting the error escape here would skip the transcript and
+    the questions too, leaving the exercise looking simply broken.
+    """
+    path = await tts.synthesize(audio_text)
+    if path is None:
+        return False
+    try:
+        voice = BufferedInputFile(path.read_bytes(), filename="clip.mp3")
+        await message.answer_voice(
+            voice,
+            caption="🎧 Listen carefully. You can replay it before answering.",
+        )
+        return True
+    except TelegramAPIError as exc:
+        # Telegram refuses sendVoice when the recipient has voice messages
+        # switched off (VOICE_MESSAGES_FORBIDDEN), among other reasons.
+        logger.warning("Could not send the listening clip: %s", exc)
+        return False
+    except OSError:
+        logger.warning("Could not read the cached clip %s", path, exc_info=True)
+        return False
 
 
 # --- Question rendering & answer checking ---------------------------------
@@ -148,6 +209,12 @@ async def _grade(message: Message, state: FSMContext, db: Database, given: str) 
 
     correct = is_correct(q, given)
     right = correct_answer_text(q)
+
+    if not correct and q["type"] == "gap":
+        # The learner's own errors are the best study material they have.
+        await mistakes.from_gap_answer(
+            db, message.chat.id, q, given, origin_id=data["exercise_id"]
+        )
 
     verdict = "✅ Correct!" if correct else f"❌ Not quite. Answer: <b>{esc(right)}</b>"
     explanation = esc(q.get("explanation", ""))

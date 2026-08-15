@@ -46,6 +46,7 @@ async def _set_commands(bot: Bot) -> None:
             BotCommand(command="writing", description="✍️ Writing tasks"),
             BotCommand(command="speaking", description="🗣 Speaking practice"),
             BotCommand(command="vocabulary", description="🔤 Vocabulary flashcards"),
+            BotCommand(command="test", description="📝 Full mock test with a band score"),
             BotCommand(command="progress", description="📊 Your progress"),
             BotCommand(command="help", description="How to use the bot"),
             BotCommand(command="cancel", description="Stop the current exercise"),

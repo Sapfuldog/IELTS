@@ -10,12 +10,15 @@ Order matters, and the two ends of the list are load-bearing:
 """
 from aiogram import Router
 
-from . import common, progress, quiz, speaking, vocabulary, writing
+from . import common, mock_test, progress, quiz, speaking, vocabulary, writing
 
 
 def build_router() -> Router:
     root = Router(name="root")
     root.include_router(common.router)  # global commands — must stay first
+    # The mock test holds its own states and must see them before the practice
+    # routers, whose state handlers would otherwise swallow test answers.
+    root.include_router(mock_test.router)
     root.include_router(quiz.router)
     root.include_router(writing.router)
     root.include_router(speaking.router)

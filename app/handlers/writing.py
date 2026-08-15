@@ -9,8 +9,9 @@ from aiogram.types import CallbackQuery, Message
 from app import keyboards as kb
 from app.config import Config
 from app.db import Database
-from app.formatting import esc, translation_block
-from app.services import content
+from app.formatting import esc, translation_block, split_message
+from app.services import content, mistakes
+from app.services.agent import TutorAgent
 from app.services.evaluation import evaluate_essay
 from app.states import Writing
 
@@ -64,16 +65,30 @@ async def receive_essay(
         return
 
     thinking = await message.answer("⏳ Assessing your response…")
-    feedback = await evaluate_essay(message.text, task, config)
+
+    # Go through the agent when it is available so the band can be stored;
+    # evaluate_essay only hands back rendered HTML, which Progress cannot use.
+    result = await TutorAgent(config).evaluate("writing", task, message.text)
+    if result is not None:
+        feedback, band = result.as_html(), result.band
+        await mistakes.from_corrections(
+            db, message.chat.id, result.corrections, "writing",
+            origin_id=data["task_id"],
+        )
+    else:
+        feedback, band = await evaluate_essay(message.text, task, config), None
 
     await db.save_result(
         user_id=message.chat.id,
         section="writing",
         exercise_id=data["task_id"],
-        score=None,
-        max_score=None,
+        score=band,
+        max_score=9.0 if band is not None else None,
     )
     await state.clear()
 
     await thinking.delete()
-    await message.answer(feedback, reply_markup=kb.main_menu())
+    chunks = split_message(feedback)
+    for chunk in chunks[:-1]:
+        await message.answer(chunk)
+    await message.answer(chunks[-1], reply_markup=kb.main_menu())

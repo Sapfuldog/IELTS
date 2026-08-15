@@ -25,6 +25,34 @@ CREATE TABLE IF NOT EXISTS results (
 );
 
 CREATE INDEX IF NOT EXISTS idx_results_user ON results(user_id);
+
+-- Flashcards, whether they came from a vocabulary deck or from a mistake the
+-- learner made. `source` records which, so a card can be traced back to the
+-- exercise that produced it and mistake cards can be shown differently.
+CREATE TABLE IF NOT EXISTS cards (
+    id             INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id        INTEGER NOT NULL,
+    word           TEXT NOT NULL,
+    definition     TEXT,
+    example        TEXT,
+    translation    TEXT,
+    source         TEXT NOT NULL,      -- deck | gap | writing | speaking
+    origin_id      TEXT,               -- deck or exercise it came from
+    context        TEXT,               -- the sentence the word appeared in
+    learner_answer TEXT,               -- what they wrote, for mistake cards
+    due_at         TEXT NOT NULL DEFAULT (datetime('now')),
+    interval_days  REAL NOT NULL DEFAULT 0,
+    ease           REAL NOT NULL DEFAULT 2.5,
+    streak         INTEGER NOT NULL DEFAULT 0,
+    reviews        INTEGER NOT NULL DEFAULT 0,
+    dismissed      INTEGER NOT NULL DEFAULT 0,
+    created_at     TEXT NOT NULL DEFAULT (datetime('now')),
+    -- One card per word per source: re-reading a deck must not duplicate it,
+    -- but the same word missed in a gap fill is a genuinely different card.
+    UNIQUE(user_id, word, source)
+);
+
+CREATE INDEX IF NOT EXISTS idx_cards_due ON cards(user_id, dismissed, due_at);
 """
 
 
@@ -68,6 +96,107 @@ class Database:
                 (user_id, section, exercise_id, score, max_score),
             )
             await db.commit()
+
+    # --- Flashcards -------------------------------------------------------
+
+    async def add_card(
+        self,
+        user_id: int,
+        word: str,
+        *,
+        source: str,
+        definition: str | None = None,
+        example: str | None = None,
+        translation: str | None = None,
+        origin_id: str | None = None,
+        context: str | None = None,
+        learner_answer: str | None = None,
+    ) -> bool:
+        """Add a card unless the learner already has this word from this source.
+
+        Returns True when a card was created. Re-reviewing a deck must not
+        reset progress, so an existing card is left exactly as it is.
+        """
+        async with aiosqlite.connect(self._path) as db:
+            cursor = await db.execute(
+                """
+                INSERT OR IGNORE INTO cards
+                    (user_id, word, definition, example, translation,
+                     source, origin_id, context, learner_answer)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (user_id, word.strip(), definition, example, translation,
+                 source, origin_id, context, learner_answer),
+            )
+            await db.commit()
+            return cursor.rowcount > 0
+
+    async def due_cards(self, user_id: int, limit: int = 20) -> list[dict]:
+        """Cards to study now: overdue first, then ones never seen."""
+        async with aiosqlite.connect(self._path) as db:
+            db.row_factory = aiosqlite.Row
+            cursor = await db.execute(
+                """
+                SELECT * FROM cards
+                WHERE user_id = ? AND dismissed = 0 AND due_at <= datetime('now')
+                ORDER BY reviews = 0, due_at
+                LIMIT ?
+                """,
+                (user_id, limit),
+            )
+            return [dict(row) for row in await cursor.fetchall()]
+
+    async def record_review(self, card_id: int, knew: bool) -> None:
+        """Move a card along its schedule after the learner answers."""
+        from app.services.scheduling import review
+
+        async with aiosqlite.connect(self._path) as db:
+            db.row_factory = aiosqlite.Row
+            cursor = await db.execute(
+                "SELECT interval_days, ease, streak FROM cards WHERE id = ?",
+                (card_id,),
+            )
+            row = await cursor.fetchone()
+            if row is None:
+                return
+            schedule = review(row["interval_days"], row["ease"], row["streak"], knew)
+            await db.execute(
+                """
+                UPDATE cards
+                SET interval_days = ?, ease = ?, streak = ?,
+                    reviews = reviews + 1,
+                    due_at = datetime('now', ? || ' days')
+                WHERE id = ?
+                """,
+                (schedule.interval_days, schedule.ease, schedule.streak,
+                 f"+{schedule.interval_days}", card_id),
+            )
+            await db.commit()
+
+    async def dismiss_card(self, card_id: int) -> None:
+        """Retire a card the learner says was a typo, not a gap in knowledge."""
+        async with aiosqlite.connect(self._path) as db:
+            await db.execute("UPDATE cards SET dismissed = 1 WHERE id = ?", (card_id,))
+            await db.commit()
+
+    async def card_counts(self, user_id: int) -> dict:
+        """Totals for the progress screen."""
+        async with aiosqlite.connect(self._path) as db:
+            db.row_factory = aiosqlite.Row
+            cursor = await db.execute(
+                """
+                SELECT
+                    COUNT(*)                                          AS total,
+                    SUM(due_at <= datetime('now'))                    AS due,
+                    SUM(source != 'deck')                             AS from_mistakes,
+                    SUM(streak >= 3)                                  AS learned
+                FROM cards
+                WHERE user_id = ? AND dismissed = 0
+                """,
+                (user_id,),
+            )
+            row = await cursor.fetchone()
+            return {k: (row[k] or 0) for k in ("total", "due", "from_mistakes", "learned")}
 
     async def stats_by_section(self, user_id: int) -> list[dict]:
         """Aggregate progress per section for one user."""

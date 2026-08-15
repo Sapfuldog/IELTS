@@ -17,3 +17,11 @@ class Speaking(StatesGroup):
 
 class Vocab(StatesGroup):
     reviewing = State()
+
+
+class MockTest(StatesGroup):
+    """A full test runs through the four sections in order, in one sitting."""
+    listening = State()
+    reading = State()
+    writing = State()
+    speaking = State()
