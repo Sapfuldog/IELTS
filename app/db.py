@@ -53,6 +53,21 @@ CREATE TABLE IF NOT EXISTS cards (
 );
 
 CREATE INDEX IF NOT EXISTS idx_cards_due ON cards(user_id, dismissed, due_at);
+
+-- How each question actually performs. The validator checks that a question is
+-- self-consistent and the key audit checks it against its own explanation;
+-- neither can catch a key that is confidently, uniformly wrong. Learners can:
+-- a question nobody ever gets right is far more likely to have a bad key than
+-- to be hard.
+CREATE TABLE IF NOT EXISTS question_stats (
+    section      TEXT NOT NULL,
+    exercise_id  TEXT NOT NULL,
+    q_index      INTEGER NOT NULL,
+    attempts     INTEGER NOT NULL DEFAULT 0,
+    correct      INTEGER NOT NULL DEFAULT 0,
+    updated_at   TEXT NOT NULL DEFAULT (datetime('now')),
+    PRIMARY KEY (section, exercise_id, q_index)
+);
 """
 
 
@@ -172,6 +187,41 @@ class Database:
                  f"+{schedule.interval_days}", card_id),
             )
             await db.commit()
+
+    async def record_answer(
+        self, section: str, exercise_id: str, q_index: int, correct: bool
+    ) -> None:
+        """Note how one question was answered, for the quality report."""
+        async with aiosqlite.connect(self._path) as db:
+            await db.execute(
+                """
+                INSERT INTO question_stats
+                    (section, exercise_id, q_index, attempts, correct)
+                VALUES (?, ?, ?, 1, ?)
+                ON CONFLICT(section, exercise_id, q_index) DO UPDATE SET
+                    attempts = attempts + 1,
+                    correct = correct + excluded.correct,
+                    updated_at = datetime('now')
+                """,
+                (section, exercise_id, q_index, 1 if correct else 0),
+            )
+            await db.commit()
+
+    async def question_stats(self, min_attempts: int = 1) -> list[dict]:
+        """Per-question results, for anything with enough answers to judge."""
+        async with aiosqlite.connect(self._path) as db:
+            db.row_factory = aiosqlite.Row
+            cursor = await db.execute(
+                """
+                SELECT section, exercise_id, q_index, attempts, correct,
+                       CAST(correct AS REAL) / attempts AS pass_rate
+                FROM question_stats
+                WHERE attempts >= ?
+                ORDER BY pass_rate, attempts DESC
+                """,
+                (min_attempts,),
+            )
+            return [dict(row) for row in await cursor.fetchall()]
 
     async def all_words(self, user_id: int) -> list[dict]:
         """Every word the learner already holds, dismissed ones included.

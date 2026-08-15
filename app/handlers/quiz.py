@@ -258,6 +258,8 @@ async def _grade(message: Message, state: FSMContext, db: Database, given: str) 
     correct = is_correct(q, given)
     right = correct_answer_text(q)
 
+    await db.record_answer(data["section"], data["exercise_id"], idx, correct)
+
     if not correct and q["type"] == "gap":
         # The learner's own errors are the best study material they have.
         await mistakes.from_gap_answer(

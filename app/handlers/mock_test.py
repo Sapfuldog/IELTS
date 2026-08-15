@@ -312,6 +312,8 @@ async def _record_answer(
     q = exercise["questions"][data["q_index"]]
 
     was_right = is_correct(q, given)
+    await db.record_answer(section, exercise["id"], data["q_index"], was_right)
+
     if not was_right and q["type"] == "gap":
         await mistakes.from_gap_answer(
             db, message.chat.id, q, given, origin_id=exercise["id"]
