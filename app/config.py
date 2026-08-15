@@ -64,7 +64,7 @@ def load_config() -> Config:
         bot_token=token,
         db_path=db_path,
         anthropic_api_key=os.getenv("ANTHROPIC_API_KEY", "").strip() or None,
-        anthropic_model=os.getenv("ANTHROPIC_MODEL", "claude-sonnet-5").strip(),
+        anthropic_model=os.getenv("ANTHROPIC_MODEL", "claude-opus-5").strip(),
         openrouter_api_key=os.getenv("OPENROUTER_API_KEY", "").strip() or None,
         openrouter_model=os.getenv(
             "OPENROUTER_MODEL", "nvidia/nemotron-3-super-120b-a12b:free"

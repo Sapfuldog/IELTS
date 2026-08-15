@@ -34,11 +34,17 @@ MAX_ATTEMPTS = 2
 # questions with explanations; 4096 tokens is not enough and the truncated
 # JSON fails to parse.
 GENERATION_TOKENS = 12000
-MARKING_TOKENS = 3000
+# max_tokens caps thinking *plus* the reply, and current models think by
+# default, so a tight limit truncates the answer mid-sentence.
+MARKING_TOKENS = 16000
 
 
 class TruncatedResponse(RuntimeError):
     """The model ran out of output budget mid-JSON."""
+
+
+class FeedbackUnavailable(RuntimeError):
+    """The API answered, but with nothing usable to show the learner."""
 
 # --- Response schemas -----------------------------------------------------
 # Structured outputs need every object closed (`additionalProperties: false`)
@@ -420,9 +426,16 @@ class TutorAgent:
             output_config={"format": {"type": "json_schema", "schema": schema}},
             messages=[{"role": "user", "content": prompt}],
         )
+        # A safety classifier can decline a request: HTTP 200, but the content
+        # is empty or partial. Reading it unconditionally would reach the
+        # learner as a blank message.
+        if getattr(response, "stop_reason", None) == "refusal":
+            raise FeedbackUnavailable("the model declined to answer this request")
         text = "".join(
             b.text for b in response.content if getattr(b, "type", "") == "text"
         )
+        if not text.strip():
+            raise FeedbackUnavailable("the model returned no text")
         return json.loads(text)
 
     async def _ask_openrouter(self, prompt: str, schema: dict, max_tokens: int) -> dict:
@@ -473,7 +486,10 @@ class TutorAgent:
                 f"the model hit the {max_tokens}-token limit before closing the "
                 "JSON; raise max_tokens or ask for shorter content"
             )
-        return json.loads(choice["message"]["content"])
+        content = choice.get("message", {}).get("content") or ""
+        if not content.strip():
+            raise FeedbackUnavailable("the model returned no text")
+        return json.loads(content)
 
     # --- Generation -------------------------------------------------------
 

@@ -5,6 +5,8 @@ key so `available` is True, and every test replaces `_ask` before calling in.
 """
 from __future__ import annotations
 
+import dataclasses
+
 import pytest
 
 from app.services.agent import Evaluation, TutorAgent
@@ -175,3 +177,55 @@ class TestEvaluationRendering:
     def test_html_is_escaped(self):
         html = Evaluation(band=6.0, comment="use <b> & co").as_html()
         assert "&lt;b&gt;" in html and "&amp;" in html
+
+
+class TestRefusedAndEmptyAnswers:
+    """A classifier can decline with HTTP 200 and no usable content."""
+
+    async def test_a_refusal_is_not_treated_as_an_answer(self, agent_config):
+        from app.services.agent import FeedbackUnavailable
+
+        agent = TutorAgent(agent_config)
+
+        class Response:
+            stop_reason = "refusal"
+            content = []
+
+        async def _create(**kwargs):
+            return Response()
+
+        agent._client = type("C", (), {"messages": type("M", (), {"create": staticmethod(_create)})()})()
+        agent._config = dataclasses.replace(
+            agent_config, openrouter_api_key=None, anthropic_api_key="sk-ant-test"
+        )
+        with pytest.raises(FeedbackUnavailable):
+            await agent._ask_anthropic("prompt", {}, 100)
+
+    async def test_an_empty_reply_is_not_parsed_as_json(self, agent_config):
+        from app.services.agent import FeedbackUnavailable
+
+        agent = TutorAgent(agent_config)
+
+        class Block:
+            type = "text"
+            text = "   "
+
+        class Response:
+            stop_reason = "end_turn"
+            content = [Block()]
+
+        async def _create(**kwargs):
+            return Response()
+
+        agent._client = type("C", (), {"messages": type("M", (), {"create": staticmethod(_create)})()})()
+        agent._config = dataclasses.replace(
+            agent_config, openrouter_api_key=None, anthropic_api_key="sk-ant-test"
+        )
+        with pytest.raises(FeedbackUnavailable):
+            await agent._ask_anthropic("prompt", {}, 100)
+
+    def test_marking_leaves_room_for_thinking(self):
+        """max_tokens caps thinking plus reply, so a tight cap truncates."""
+        from app.services.agent import MARKING_TOKENS
+
+        assert MARKING_TOKENS >= 8000
