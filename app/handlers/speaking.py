@@ -10,7 +10,7 @@ from app import keyboards as kb
 from app.config import Config
 from app.db import Database
 from app.formatting import esc, spoiler, split_message, translation_block
-from app.services import content, mistakes
+from app.services import content, mistakes, transcription
 from app.services.agent import TutorAgent
 from app.services.banding import describe
 from app.states import Speaking
@@ -87,6 +87,54 @@ async def stop(call: CallbackQuery, state: FSMContext) -> None:
     await call.message.answer("⏹ Stopped. Back to the menu.", reply_markup=kb.main_menu())
 
 
+async def _transcribe_voice(message: Message, bot) -> str | None:
+    """Turn a voice note into text, and show the learner what was heard.
+
+    The transcript is always displayed. Speech recognition is least reliable
+    on strongly accented English — which is precisely who this bot is for —
+    so marking someone silently against a transcript they never saw would
+    punish them for words the machine misheard.
+    """
+    if not transcription.available():
+        await message.answer(
+            "🎙 Voice received, but speech recognition is not installed here.\n"
+            "<i>Send the same answer typed and it will be marked.</i>"
+        )
+        return None
+
+    notice = await message.answer("🎧 Listening to your answer…")
+    voice = message.voice or message.audio
+    buffer = io.BytesIO()
+    await bot.download(voice, destination=buffer)
+
+    spoken = await asyncio.to_thread(transcription.transcribe, buffer.getvalue())
+    if spoken is None or not spoken.text.strip():
+        await notice.edit_text(
+            "🎙 Could not make out the recording.\n"
+            "<i>Try again somewhere quieter, or send the answer typed.</i>"
+        )
+        return None
+
+    await notice.delete()
+    lines = [
+        "🎙 <b>What I heard</b>",
+        "",
+        f"<i>{esc(spoken.text)}</i>",
+        "",
+        "📊 " + "; ".join(spoken.observations()),
+    ]
+    if spoken.uncertain:
+        # Say it plainly rather than marking a bad transcript as if it were
+        # the answer.
+        lines.append(
+            "\n⚠️ <i>The recording was hard to make out, so the transcript "
+            "may be wrong. If it does not match what you said, the feedback "
+            "below is about the wrong words — send it typed instead.</i>"
+        )
+    await message.answer("\n".join(lines))
+    return spoken.text
+
+
 async def _analyse(
     message: Message, exercise: dict, question: str, answer: str, config: Config
 ) -> None:
@@ -146,7 +194,7 @@ async def _band_for_set(
 
 @router.message(Speaking.answering, F.voice | F.text | F.audio)
 async def receive_answer(
-    message: Message, state: FSMContext, db: Database, config: Config
+    message: Message, state: FSMContext, db: Database, config: Config, bot
 ) -> None:
     data = await state.get_data()
     exercise = content.get_exercise("speaking", data["exercise_id"])
@@ -160,13 +208,12 @@ async def receive_answer(
             message, exercise, exercise["questions"][idx], message.text, config
         )
     else:
-        # The bot has no speech recognition, so a voice note cannot be marked.
-        # Say so plainly rather than implying the answer was assessed.
-        await message.answer(
-            "🎙 Voice answer received — good practice for fluency.\n"
-            "<i>Analysis needs text: send the same answer typed and it will be "
-            "marked against the band descriptors.</i>"
-        )
+        spoken = await _transcribe_voice(message, bot)
+        if spoken:
+            given.append(spoken)
+            await _analyse(
+                message, exercise, exercise["questions"][idx], spoken, config
+            )
 
     if next_idx < len(exercise["questions"]):
         await state.update_data(q_index=next_idx, given=given)

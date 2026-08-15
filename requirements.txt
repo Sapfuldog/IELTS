@@ -7,6 +7,9 @@ anthropic==0.122.0     # AI-based Writing/Speaking feedback (needs ANTHROPIC_API
                        # 0.39.0 is incompatible with httpx>=0.28 (passes removed `proxies` kwarg)
 aiohttp-socks==0.8.4   # only needed if you set TELEGRAM_PROXY
 Pillow==11.0.0         # draws labelling diagrams; without it they go as text
+faster-whisper==1.2.1  # transcribes voice answers locally; without it Speaking is text-only
+                       # decodes OGG itself, so no system ffmpeg is needed.
+                       # For GPU also:  pip install nvidia-cublas-cu12 nvidia-cudnn-cu12
 
 # Test suite (dev only):  pytest -q
 pytest==8.3.3
