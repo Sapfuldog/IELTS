@@ -229,11 +229,14 @@ async def _present_material(message: Message, section: str, exercise: dict) -> N
     if section == "reading":
         for chunk in split_message(exercise["passage"]):
             await message.answer(esc(chunk))
+        from app.handlers.quiz import _send_diagram_or_text
+
+        await _send_diagram_or_text(message, exercise)
         return
 
     # Listening: reuse the quiz engine's clip sender so a failed clip degrades
     # to the transcript here exactly as it does in practice mode.
-    from app.handlers.quiz import _send_clip
+    from app.handlers.quiz import _send_clip, _send_diagram_or_text
 
     audio_text = exercise["audio_text"]
     if await _send_clip(message, audio_text):

@@ -21,7 +21,7 @@ from app.formatting import (
     esc, gap_prompt, group_header, match_prompt, multi_prompt, spoiler,
     split_message, translation_block,
 )
-from app.services import content, mistakes, tts
+from app.services import content, diagram, mistakes, tts
 from app.services.agent import TutorAgent
 from app.services.grading import correct_answer_text, is_correct
 from app.states import Quiz
@@ -133,9 +133,45 @@ async def _send_translation(message: Message, exercise: dict) -> None:
         await message.answer(translation_block(chunk))
 
 
+async def send_diagram(message: Message, exercise: dict) -> bool:
+    """Send the labelling diagram as a picture. False if there is none, or if
+    it could not be drawn — the caller then falls back to listing the stages.
+    """
+    spec = exercise.get("diagram")
+    if not spec:
+        return False
+
+    png = diagram.render(spec.get("title", ""), spec.get("steps", []))
+    if png is None:
+        return False
+    try:
+        await message.answer_photo(
+            BufferedInputFile(png, filename="diagram.png"),
+            caption=f"🖼 {esc(spec.get('title', 'Label the diagram'))}",
+        )
+        return True
+    except TelegramAPIError as exc:
+        logger.warning("Could not send the diagram: %s", exc)
+        return False
+
+
+async def _send_diagram_or_text(message: Message, exercise: dict) -> None:
+    spec = exercise.get("diagram")
+    if not spec:
+        return
+    if await send_diagram(message, exercise):
+        return
+    # A picture that cannot be drawn or delivered must not cost the exercise.
+    steps = " → ".join(str(step) for step in spec.get("steps", []))
+    await message.answer(
+        f"🖼 <b>{esc(spec.get('title', 'Label the diagram'))}</b>\n{esc(steps)}"
+    )
+
+
 async def _send_reading(message: Message, exercise: dict) -> None:
     for chunk in split_message(exercise["passage"]):
         await message.answer(esc(chunk))
+    await _send_diagram_or_text(message, exercise)
     await _send_translation(message, exercise)
 
 
@@ -152,6 +188,7 @@ async def _send_listening(message: Message, exercise: dict) -> None:
         )
         for chunk in split_message(audio_text):
             await message.answer(esc(chunk))
+    await _send_diagram_or_text(message, exercise)
     await _send_translation(message, exercise)
 
 

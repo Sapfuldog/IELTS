@@ -166,6 +166,49 @@ def check_groups(exercise: dict, where: str) -> list[str]:
     return problems
 
 
+def check_diagram(exercise: dict, where: str) -> list[str]:
+    """Check a labelling diagram against the questions that go with it.
+
+    The picture and the questions are written separately and can disagree:
+    a diagram with three blanks and two questions leaves the learner staring
+    at a gap nobody asks about, which reads as a broken exercise.
+    """
+    diagram = exercise.get("diagram")
+    if not diagram:
+        return []
+    from app.services.diagram import is_blank
+
+    problems: list[str] = []
+    steps = diagram.get("steps")
+    if not isinstance(steps, list) or len(steps) < 3:
+        return [f"{where}: a diagram needs at least 3 steps"]
+    if not diagram.get("title"):
+        problems.append(f"{where}: the diagram has no title")
+
+    numbers = [
+        int(str(step).strip().strip("_"))
+        for step in steps
+        if is_blank(str(step))
+    ]
+    if not numbers:
+        problems.append(f"{where}: the diagram has no blanks to label")
+    elif sorted(numbers) != list(range(1, len(numbers) + 1)):
+        # Out-of-order or skipped numbers break the link to the questions.
+        problems.append(
+            f"{where}: diagram blanks must be numbered 1..{len(numbers)}, got {numbers}"
+        )
+    elif len(set(numbers)) != len(numbers):
+        problems.append(f"{where}: a diagram blank number is repeated")
+
+    gaps = [q for q in exercise.get("questions", []) if q.get("type") == "gap"]
+    if numbers and len(gaps) < len(numbers):
+        problems.append(
+            f"{where}: {len(numbers)} diagram blank(s) but only {len(gaps)} "
+            "gap question(s) to fill them"
+        )
+    return problems
+
+
 QUIZ_SECTIONS = {"reading": "passage", "listening": "audio_text"}
 
 
@@ -277,6 +320,7 @@ def validate_exercise(section: str, exercise: dict) -> list[str]:
         if not questions:
             problems.append(f"{section}: no questions")
         problems += check_groups(exercise, section)
+        problems += check_diagram(exercise, section)
         for i, q in enumerate(questions, 1):
             problems += validate_question(q, f"{section} Q{i}")
 
