@@ -15,7 +15,10 @@ from __future__ import annotations
 import re
 
 CHOICE_TYPES = {"tf", "tfng", "ynng"}
-QUESTION_TYPES = {"mc", "gap", "multi"} | CHOICE_TYPES
+# `match` is graded exactly like `mc` — it differs only in where the options
+# come from, and app.services.content resolves that before anything gets here.
+INDEX_TYPES = {"mc", "match"}
+QUESTION_TYPES = {"gap", "multi"} | INDEX_TYPES | CHOICE_TYPES
 
 # Real papers ask for these by letter ("Choose TWO letters, A-E"), so the
 # answer is typed rather than tapped. A toggling keyboard would have to hold
@@ -146,7 +149,7 @@ def numeric_form(value: str) -> str:
 def is_correct(question: dict, given: str) -> bool:
     qtype = question["type"]
 
-    if qtype == "mc":
+    if qtype in INDEX_TYPES:
         return given.isdigit() and int(given) == question["answer"]
 
     if qtype == "multi":
@@ -166,7 +169,7 @@ def is_correct(question: dict, given: str) -> bool:
 
 
 def correct_answer_text(question: dict) -> str:
-    if question["type"] == "mc":
+    if question["type"] in INDEX_TYPES:
         return question["options"][question["answer"]]
     if question["type"] == "multi":
         options = question.get("options", [])

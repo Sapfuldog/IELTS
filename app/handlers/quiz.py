@@ -18,7 +18,8 @@ from app import keyboards as kb
 from app.config import Config
 from app.db import Database
 from app.formatting import (
-    esc, gap_prompt, multi_prompt, spoiler, split_message, translation_block,
+    esc, gap_prompt, group_header, match_prompt, multi_prompt, spoiler,
+    split_message, translation_block,
 )
 from app.services import content, mistakes, tts
 from app.services.agent import TutorAgent
@@ -191,7 +192,13 @@ async def _send_question(message: Message, state: FSMContext) -> None:
     q = exercise["questions"][idx]
     header = f"❓ <b>Question {idx + 1}/{total}</b>\n\n{esc(q['q'])}"
 
-    if q["type"] == "mc":
+    intro = group_header(q)
+    if intro:
+        await message.answer(intro)
+
+    if q["type"] == "match":
+        await message.answer(f"{header}\n\n{match_prompt(q)}")
+    elif q["type"] == "mc":
         await message.answer(header, reply_markup=kb.mc_options(q["options"]))
     elif q["type"] == "tf":
         await message.answer(header, reply_markup=kb.tf_options())
@@ -281,7 +288,7 @@ async def on_typed_answer(message: Message, state: FSMContext, db: Database) -> 
     exercise = content.get_exercise(data["section"], data["exercise_id"])
     q = exercise["questions"][data["q_index"]]
     # Both gap and multi are answered by typing; everything else has buttons.
-    if q["type"] not in ("gap", "multi"):
+    if q["type"] not in ("gap", "multi", "match"):
         await message.answer("Please tap one of the buttons above to answer.")
         return
     await _grade(message, state, db, message.text or "")

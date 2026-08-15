@@ -59,6 +59,29 @@ def split_message(text: str, limit: int = TELEGRAM_LIMIT) -> list[str]:
 MULTI_LETTERS = "ABCDEFGH"
 
 
+def group_header(question: dict) -> str | None:
+    """The shared option list, or None when this question does not open a group.
+
+    Only the first question of a group carries it, so the list appears once
+    above the group instead of being repeated before every paragraph.
+    """
+    options = question.get("group_options")
+    if not options:
+        return None
+    lines = [f"📋 <b>{esc(question.get('group_prompt', ''))}</b>", ""]
+    lines += [
+        f"{MULTI_LETTERS[i]}. {esc(option)}" for i, option in enumerate(options)
+    ]
+    return "\n".join(lines)
+
+
+def match_prompt(question: dict) -> str:
+    """One letter from the group's list."""
+    options = question.get("options") or []
+    last = MULTI_LETTERS[len(options) - 1] if options else "A"
+    return f"✏️ <i>Type one letter, A–{last}:</i>"
+
+
 def gap_prompt(question: dict) -> str:
     """The typing instruction, with the word bank when the question offers one.
 

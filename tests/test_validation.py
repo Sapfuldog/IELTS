@@ -192,3 +192,136 @@ class TestWordBank:
     def test_an_empty_entry_is_rejected(self):
         q = {**self.BASE, "bank": ["waste", "  ", "oxygen"]}
         assert any("empty entry" in p for p in validate_question(q))
+
+
+class TestSharedOptionGroups:
+    """A broken group reference marks the wrong option correct without crashing."""
+
+    def make(self, **overrides):
+        exercise = {
+            "id": "r1", "title": "T", "passage": "p",
+            "groups": [{
+                "id": "headings", "prompt": "Choose a heading.",
+                "options": ["Growth", "Costs", "History", "Future"],
+                "exhaustive": True,
+            }],
+            "questions": [
+                {"type": "match", "group": "headings", "q": "Paragraph A",
+                 "answer": 0, "explanation": "e",
+                 "options": ["Growth", "Costs", "History", "Future"]},
+                {"type": "match", "group": "headings", "q": "Paragraph B",
+                 "answer": 1, "explanation": "e",
+                 "options": ["Growth", "Costs", "History", "Future"]},
+            ],
+        }
+        exercise.update(overrides)
+        return exercise
+
+    def test_a_valid_group_passes(self):
+        assert validate_exercise("reading", self.make()) == []
+
+    def test_a_dangling_reference_is_caught(self):
+        ex = self.make()
+        ex["questions"][0]["group"] = "typo"
+        assert any("unknown group" in p for p in validate_exercise("reading", ex))
+
+    def test_an_unused_group_is_caught(self):
+        """Almost always a typo in a question, not harmless dead weight."""
+        ex = self.make()
+        for q in ex["questions"]:
+            q.pop("group")
+        assert any("nothing refers to" in p for p in validate_exercise("reading", ex))
+
+    def test_an_exhaustive_group_may_not_reuse_an_answer(self):
+        ex = self.make()
+        ex["questions"][1]["answer"] = 0
+        assert any("reuses an answer" in p for p in validate_exercise("reading", ex))
+
+    def test_a_non_exhaustive_group_may_reuse(self):
+        ex = self.make()
+        ex["groups"][0]["exhaustive"] = False
+        ex["questions"][1]["answer"] = 0
+        assert validate_exercise("reading", ex) == []
+
+    def test_fewer_options_than_questions_is_caught(self):
+        ex = self.make()
+        ex["groups"][0]["options"] = ["Growth"]
+        assert any("at least 3 options" in p for p in validate_exercise("reading", ex))
+
+    def test_duplicate_group_ids_are_caught(self):
+        ex = self.make()
+        ex["groups"].append(dict(ex["groups"][0]))
+        assert any("duplicate group id" in p for p in validate_exercise("reading", ex))
+
+    def test_a_repeated_option_is_caught(self):
+        ex = self.make()
+        ex["groups"][0]["options"] = ["Growth", "Growth", "History", "Future"]
+        assert any("repeats an option" in p for p in validate_exercise("reading", ex))
+
+    def test_a_group_needs_a_prompt(self):
+        ex = self.make()
+        ex["groups"][0].pop("prompt")
+        assert any("no prompt" in p for p in validate_exercise("reading", ex))
+
+    def test_exercises_without_groups_are_untouched(self):
+        ex = self.make()
+        ex.pop("groups")
+        for q in ex["questions"]:
+            q.pop("group")
+            q["type"] = "mc"
+        assert validate_exercise("reading", ex) == []
+
+
+class TestGroupExpansion:
+    """Storing the list once must leave every question self-contained."""
+
+    RAW = {
+        "id": "r1", "title": "T", "passage": "p",
+        "groups": [{
+            "id": "people", "prompt": "Who said this?",
+            "options": ["Dr Lee", "Prof Ito", "Ms Adams"],
+        }],
+        "questions": [
+            {"type": "match", "group": "people", "q": "Statement 1",
+             "answer": 2, "explanation": "e"},
+            {"type": "match", "group": "people", "q": "Statement 2",
+             "answer": 0, "explanation": "e"},
+        ],
+    }
+
+    def expanded(self):
+        import copy
+
+        from app.services.content import expand_groups
+
+        return expand_groups(copy.deepcopy(self.RAW))
+
+    def test_options_reach_every_question(self):
+        ex = self.expanded()
+        assert all(q["options"] == ["Dr Lee", "Prof Ito", "Ms Adams"]
+                   for q in ex["questions"])
+
+    def test_only_the_first_question_carries_the_group_header(self):
+        """The list is shown once, above the group, not before every question."""
+        ex = self.expanded()
+        assert "group_prompt" in ex["questions"][0]
+        assert "group_prompt" not in ex["questions"][1]
+
+    def test_an_expanded_exercise_validates_and_grades(self):
+        from app.services.grading import correct_answer_text, is_correct
+
+        ex = self.expanded()
+        assert validate_exercise("reading", ex) == []
+        assert is_correct(ex["questions"][0], "2")
+        assert not is_correct(ex["questions"][0], "1")
+        assert correct_answer_text(ex["questions"][0]) == "Ms Adams"
+
+    def test_a_dangling_reference_leaves_the_question_alone(self):
+        import copy
+
+        from app.services.content import expand_groups
+
+        raw = copy.deepcopy(self.RAW)
+        raw["questions"][0]["group"] = "typo"
+        ex = expand_groups(raw)
+        assert "options" not in ex["questions"][0]  # the validator reports it

@@ -15,6 +15,7 @@ import re
 
 from app.services.grading import (
     CHOICE_LABELS,
+    INDEX_TYPES,
     MULTI_LETTERS,
     CHOICE_TYPES,
     QUESTION_TYPES,
@@ -96,6 +97,75 @@ def _check_word_bank(q: dict, where: str) -> list[str]:
     return []
 
 
+def check_groups(exercise: dict, where: str) -> list[str]:
+    """Check the shared option lists used by matching formats.
+
+    Individual questions are checked elsewhere and, thanks to the expansion in
+    `app.services.content`, look self-contained by then. What can only be
+    checked here is the relationship between a group and the questions that
+    point at it — and a broken relationship does not crash, it silently marks
+    the wrong option correct.
+    """
+    groups = exercise.get("groups")
+    if not groups:
+        return []
+    if not isinstance(groups, list):
+        return [f"{where}: 'groups' must be a list"]
+
+    problems: list[str] = []
+    seen_ids: set[str] = set()
+    for group in groups:
+        gid = group.get("id")
+        if not gid:
+            problems.append(f"{where}: a group has no id")
+            continue
+        if gid in seen_ids:
+            problems.append(f"{where}: duplicate group id {gid!r}")
+        seen_ids.add(gid)
+
+        options = group.get("options")
+        if not isinstance(options, list) or len(options) < 3:
+            problems.append(f"{where}: group {gid!r} needs at least 3 options")
+            continue
+        if len({str(o).strip().casefold() for o in options}) < len(options):
+            problems.append(f"{where}: group {gid!r} repeats an option")
+        if any(not str(o).strip() for o in options):
+            problems.append(f"{where}: group {gid!r} has an empty option")
+        if not group.get("prompt"):
+            problems.append(f"{where}: group {gid!r} has no prompt")
+
+    # Now the relationships.
+    used: dict[str, list[int]] = {}
+    for i, q in enumerate(exercise.get("questions", []), 1):
+        ref = q.get("group")
+        if ref is None:
+            continue
+        if ref not in seen_ids:
+            problems.append(f"{where} Q{i}: refers to unknown group {ref!r}")
+            continue
+        used.setdefault(ref, []).append(q.get("answer"))
+
+    for group in groups:
+        gid = group.get("id")
+        if gid not in used:
+            # Almost certainly a typo in a question's `group`, not dead weight.
+            problems.append(f"{where}: nothing refers to group {gid!r}")
+            continue
+        answers = used[gid]
+        options = group.get("options") or []
+        if len(options) < len(answers):
+            problems.append(
+                f"{where}: group {gid!r} has {len(options)} options for "
+                f"{len(answers)} questions"
+            )
+        if group.get("exhaustive") and len(set(answers)) < len(answers):
+            # One heading per paragraph: reusing one makes the task unsolvable.
+            problems.append(
+                f"{where}: group {gid!r} is exhaustive but reuses an answer"
+            )
+    return problems
+
+
 QUIZ_SECTIONS = {"reading": "passage", "listening": "audio_text"}
 
 
@@ -109,7 +179,7 @@ def validate_question(q: dict, where: str = "question") -> list[str]:
     if "answer" not in q:
         return problems + [f"{where}: missing 'answer'"]
 
-    if qtype == "mc":
+    if qtype in INDEX_TYPES:
         options = q.get("options")
         if not isinstance(options, list) or len(options) < 2:
             return problems + [f"{where}: multiple choice needs at least 2 options"]
@@ -206,6 +276,7 @@ def validate_exercise(section: str, exercise: dict) -> list[str]:
         questions = exercise.get("questions") or []
         if not questions:
             problems.append(f"{section}: no questions")
+        problems += check_groups(exercise, section)
         for i, q in enumerate(questions, 1):
             problems += validate_question(q, f"{section} Q{i}")
 

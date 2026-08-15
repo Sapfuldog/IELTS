@@ -25,7 +25,37 @@ _cache: dict[str, list[dict]] = {}
 
 def _read(path: Path) -> list[dict]:
     with path.open(encoding="utf-8") as fh:
-        return json.load(fh)
+        return [expand_groups(item) for item in json.load(fh)]
+
+
+def expand_groups(exercise: dict) -> dict:
+    """Copy a shared option list onto every question that references it.
+
+    Matching formats — headings, features, diagram labels — offer one list of
+    options to a group of questions, and storing it per question would be both
+    bulky and prone to drift. Stored once and expanded here, every question is
+    self-contained again by the time anything downstream sees it, so grading,
+    validation and rendering need no notion of groups at all.
+
+    The first question of each group keeps `group_prompt` and `group_options`
+    so the renderer can show the list once, above the group.
+    """
+    groups = exercise.get("groups")
+    if not groups:
+        return exercise
+
+    by_id = {group["id"]: group for group in groups if "id" in group}
+    seen: set[str] = set()
+    for question in exercise.get("questions", []):
+        group = by_id.get(question.get("group"))
+        if group is None:
+            continue  # a dangling reference; the validator reports it
+        question["options"] = list(group.get("options", []))
+        if group["id"] not in seen:
+            seen.add(group["id"])
+            question["group_prompt"] = group.get("prompt", "")
+            question["group_options"] = question["options"]
+    return exercise
 
 
 def _load(section: str) -> list[dict]:
