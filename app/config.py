@@ -67,7 +67,7 @@ def load_config() -> Config:
         anthropic_model=os.getenv("ANTHROPIC_MODEL", "claude-opus-5").strip(),
         openrouter_api_key=os.getenv("OPENROUTER_API_KEY", "").strip() or None,
         openrouter_model=os.getenv(
-            "OPENROUTER_MODEL", "nvidia/nemotron-3-super-120b-a12b:free"
+            "OPENROUTER_MODEL", "deepseek/deepseek-v4-flash"
         ).strip(),
         telegram_proxy=os.getenv("TELEGRAM_PROXY", "").strip() or None,
     )
