@@ -174,7 +174,9 @@ def check_diagram(exercise: dict, where: str) -> list[str]:
     at a gap nobody asks about, which reads as a broken exercise.
     """
     diagram = exercise.get("diagram")
-    if not diagram:
+    # An empty steps list is how "this exercise has no diagram" is expressed:
+    # structured outputs require the field to be present either way.
+    if not diagram or not diagram.get("steps"):
         return []
     from app.services.diagram import is_blank
 

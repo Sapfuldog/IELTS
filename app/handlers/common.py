@@ -43,7 +43,8 @@ _HELP = (
     "• Reading/Listening: answer by tapping a button or typing.\n"
     "• Writing: send your essay as one message to get feedback.\n"
     "• Speaking: reply to each prompt with a voice message or text.\n\n"
-    "Tip: enable ANTHROPIC_API_KEY in .env for AI-graded Writing feedback."
+    "Tip: set OPENROUTER_API_KEY (or ANTHROPIC_API_KEY) in .env for AI-graded "
+    "Writing and Speaking feedback, and for exercises written on demand."
 )
 
 

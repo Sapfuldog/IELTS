@@ -138,7 +138,7 @@ async def send_diagram(message: Message, exercise: dict) -> bool:
     it could not be drawn — the caller then falls back to listing the stages.
     """
     spec = exercise.get("diagram")
-    if not spec:
+    if not spec or not spec.get("steps"):
         return False
 
     png = diagram.render(spec.get("title", ""), spec.get("steps", []))
@@ -157,7 +157,7 @@ async def send_diagram(message: Message, exercise: dict) -> bool:
 
 async def _send_diagram_or_text(message: Message, exercise: dict) -> None:
     spec = exercise.get("diagram")
-    if not spec:
+    if not spec or not spec.get("steps"):
         return
     if await send_diagram(message, exercise):
         return

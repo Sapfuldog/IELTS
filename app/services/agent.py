@@ -33,7 +33,7 @@ MAX_ATTEMPTS = 2
 # A reading exercise carries a passage, a Russian translation and several
 # questions with explanations; 4096 tokens is not enough and the truncated
 # JSON fails to parse.
-GENERATION_TOKENS = 12000
+GENERATION_TOKENS = 24000
 # max_tokens caps thinking *plus* the reply, and current models think by
 # default, so a tight limit truncates the answer mid-sentence.
 MARKING_TOKENS = 16000
@@ -139,6 +139,18 @@ _GROUP = {
     "additionalProperties": False,
 }
 
+# A labelling diagram. Always present in the reply because structured outputs
+# require every property; empty `steps` means the exercise simply has none.
+_DIAGRAM = {
+    "type": "object",
+    "properties": {
+        "title": {"type": "string"},
+        "steps": {"type": "array", "items": {"type": "string"}},
+    },
+    "required": ["title", "steps"],
+    "additionalProperties": False,
+}
+
 _QUESTION = {
     "anyOf": [
         _MC_QUESTION, _CHOICE_QUESTION, _GAP_QUESTION, _MULTI_QUESTION,
@@ -159,11 +171,12 @@ def _quiz_schema(body_field: str) -> dict:
             body_field: {"type": "string"},
             "translation": {"type": "string"},
             "groups": {"type": "array", "items": _GROUP},
+            "diagram": _DIAGRAM,
             "questions": {"type": "array", "items": _QUESTION},
         },
         "required": [
             "title", "level", "target_band", body_field, "translation",
-            "groups", "questions",
+            "groups", "diagram", "questions",
         ],
         "additionalProperties": False,
     }
@@ -264,7 +277,16 @@ _BRIEFS = {
         "types (mc, tf, gap). Gap answers must be words said verbatim in the "
         "script. For multiple choice, 'answer' is the exact text of the "
         "correct option, copied verbatim from your own options list — never "
-        "a number or a letter."
+        "a number or a letter.\n"
+        "If the topic involves a process or a route, add a labelling diagram: "
+        "'diagram.steps' is 4-7 stages in order, of which 2-3 are blanks "
+        "written exactly as '___1___', '___2___' numbered from 1, and each "
+        "blank has a matching 'gap' question whose text starts with that "
+        "number. Keep stage names under four words — they go inside a box. "
+        "If the topic does not suit a diagram, leave 'title' empty and "
+        "'steps' an empty list rather than inventing one.\n"
+        "Leave 'groups' an empty list: matching headings needs paragraphs, "
+        "which a spoken script does not have."
     ),
     "writing": (
         "Write one IELTS Writing task on {topic}. Task 1 describes visual "
@@ -629,7 +651,7 @@ class TutorAgent:
                 payload = await self._ask(
                     ask, _SCHEMAS[section], max_tokens=GENERATION_TOKENS
                 )
-            except (json.JSONDecodeError, TruncatedResponse) as exc:
+            except (json.JSONDecodeError, TruncatedResponse, FeedbackUnavailable) as exc:
                 logger.warning(
                     "Malformed generation for %s (attempt %d): %s",
                     section, attempt, exc,
@@ -669,6 +691,11 @@ class TutorAgent:
             # Speaking sets hold plain strings here, not question objects.
             if not isinstance(question, dict):
                 continue
+            # A word bank of one or two entries gives the answer away rather
+            # than offering a choice; the model produces these on diagram
+            # questions. Treat it as no bank instead of rejecting the exercise.
+            if len(question.get("bank") or []) < 3:
+                question.pop("bank", None)
             if question.get("type") not in ("mc", "multi", "match"):
                 continue
             question["options"] = [

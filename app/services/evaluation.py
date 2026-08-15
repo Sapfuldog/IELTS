@@ -52,7 +52,8 @@ def _heuristic_feedback(text: str, task: dict) -> str:
     band = round(band * 2) / 2  # nearest 0.5
 
     lines = [
-        "📝 <b>Rule-based feedback</b> (set ANTHROPIC_API_KEY for detailed AI scoring)\n",
+        "📝 <b>Rule-based feedback</b> (set OPENROUTER_API_KEY or "
+        "ANTHROPIC_API_KEY for detailed AI scoring)\n",
         f"• Word count: <b>{words}</b> (target ≥ {min_words})"
         + ("  ✅" if words >= min_words else "  ⚠️ too short — you lose marks under the minimum"),
         f"• Paragraphs: <b>{len(paragraphs)}</b>"
@@ -83,7 +84,10 @@ def _explain(exc: Exception) -> str:
     name = exc.__class__.__name__
     detail = str(exc).strip() or "no details"
     hints = {
-        "AuthenticationError": "check ANTHROPIC_API_KEY in .env (it must start with sk-ant-)",
+        "AuthenticationError": (
+            "check the API key in .env — OpenRouter keys start with 'sk-or-', "
+            "Anthropic keys with 'sk-ant-'"
+        ),
         "PermissionDeniedError": "the API key has no access to this model",
         "NotFoundError": "check ANTHROPIC_MODEL in .env — that model id does not exist",
         "RateLimitError": "rate limit reached, try again in a minute",

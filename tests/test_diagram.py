@@ -100,3 +100,28 @@ class TestValidation:
         ex = self.make()
         ex["diagram"]["steps"] = ["A", "___1___"]
         assert any("at least 3 steps" in p for p in check_diagram(ex, "reading"))
+
+
+class TestAbsentDiagram:
+    """Structured outputs force the field to exist, so empty means absent."""
+
+    def test_an_empty_diagram_is_not_an_error(self):
+        exercise = {"diagram": {"title": "", "steps": []}, "questions": []}
+        assert check_diagram(exercise, "reading") == []
+
+    def test_an_empty_diagram_is_not_sent(self):
+        from app.handlers.quiz import _send_diagram_or_text
+        import asyncio
+
+        class Msg:
+            sent = []
+
+            async def answer(self, text, **kw):
+                self.sent.append(text)
+
+            async def answer_photo(self, *a, **kw):
+                self.sent.append("<photo>")
+
+        msg = Msg()
+        asyncio.run(_send_diagram_or_text(msg, {"diagram": {"title": "", "steps": []}}))
+        assert msg.sent == []
