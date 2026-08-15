@@ -49,6 +49,17 @@ async def start_speaking(call: CallbackQuery, state: FSMContext) -> None:
         if exercise.get("cue_card_translation"):
             text += f"\n\n{translation_block(exercise['cue_card_translation'])}"
         await call.message.answer(text)
+        # The real Part 2 is one minute to prepare and up to two to speak.
+        # Saying so matters: candidates who have never practised the timing
+        # either dry up after thirty seconds or are stopped mid-sentence.
+        await call.message.answer(
+            "⏱ <b>How Part 2 works in the exam</b>\n"
+            "You get <b>1 minute</b> to make notes, then speak for "
+            "<b>1–2 minutes</b> without interruption. Cover every bullet on "
+            "the card, and keep going until the examiner stops you — running "
+            "out of things to say early costs marks on Fluency.\n\n"
+            f"🇷🇺 {spoiler('Одна минута на заметки, затем 1–2 минуты речи без остановки. Пройдите по всем пунктам карточки и говорите, пока вас не остановят: замолчать раньше времени — потеря баллов за беглость.')}"
+        )
 
     await _send_question(call.message, state)
 

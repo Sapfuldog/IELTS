@@ -208,3 +208,34 @@ class TestRandomDraw:
                 FakeCallback(message, "card:random"), state, database
             )
         assert "nothing new to draw" in message.joined()
+
+
+class TestSpeakingPartTwoGuidance:
+    """Part 2 is one minute of notes and up to two of speech; say so."""
+
+    async def test_the_timing_is_stated_for_part_two(self, database, state):
+        from app.handlers import speaking as sp
+        from app.services import content as content_service
+
+        part2 = next(
+            e for e in content_service.get_all("speaking") if e.get("part") == 2
+        )
+        message = FakeMessage()
+        await sp.start_speaking(
+            FakeCallback(message, f"pick:speaking:{part2['id']}"), state
+        )
+        assert "1 minute" in message.joined()
+        assert "1–2 minutes" in message.joined()
+
+    async def test_part_one_is_not_given_part_two_timing(self, database, state):
+        from app.handlers import speaking as sp
+        from app.services import content as content_service
+
+        part1 = next(
+            e for e in content_service.get_all("speaking") if e.get("part") == 1
+        )
+        message = FakeMessage()
+        await sp.start_speaking(
+            FakeCallback(message, f"pick:speaking:{part1['id']}"), state
+        )
+        assert "How Part 2 works" not in message.joined()

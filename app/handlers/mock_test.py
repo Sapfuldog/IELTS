@@ -254,6 +254,14 @@ async def _present_speaking(message: Message, exercise: dict) -> None:
         lines.append(f"\n{esc(exercise['cue_card'])}")
     for i, q in enumerate(exercise.get("questions", []), 1):
         lines.append(f"{i}. {esc(q)}")
+    if exercise.get("part") == 2:
+        # In the exam this part is one minute of notes and up to two of
+        # uninterrupted speech; a candidate who has never felt that length
+        # either dries up early or gets cut off.
+        lines.append(
+            "\n⏱ In the exam: <b>1 minute</b> to prepare, then <b>1–2 minutes</b> "
+            "speaking without interruption."
+        )
     lines.append(
         "\n🗣 Answer in writing, as fully as you would speak — aim for 150–250 "
         "words. Send it as one message."
