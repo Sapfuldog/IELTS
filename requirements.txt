@@ -3,5 +3,10 @@ aiosqlite==0.20.0
 python-dotenv==1.0.1
 # Optional, enabled automatically if installed:
 gTTS==2.5.3            # voice generation for the Listening section
-anthropic==0.39.0      # AI-based Writing/Speaking feedback (needs ANTHROPIC_API_KEY)
+anthropic==0.122.0     # AI-based Writing/Speaking feedback (needs ANTHROPIC_API_KEY)
+                       # 0.39.0 is incompatible with httpx>=0.28 (passes removed `proxies` kwarg)
 aiohttp-socks==0.8.4   # only needed if you set TELEGRAM_PROXY
+
+# Test suite (dev only):  pytest -q
+pytest==8.3.3
+pytest-asyncio==0.24.0

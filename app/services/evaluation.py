@@ -7,9 +7,13 @@ useful (if rougher) feedback so the bot is fully functional offline.
 from __future__ import annotations
 
 import asyncio
+import html
+import logging
 import re
 
 from app.config import Config
+
+logger = logging.getLogger(__name__)
 
 
 def _word_count(text: str) -> int:
@@ -65,28 +69,31 @@ def _heuristic_feedback(text: str, task: dict) -> str:
 
 
 async def _ai_feedback(text: str, task: dict, config: Config) -> str:
-    from anthropic import AsyncAnthropic  # imported lazily
+    """Delegate to the agent, so there is one place that talks to a model."""
+    from app.services.agent import TutorAgent  # imported lazily, avoids a cycle
 
-    client = AsyncAnthropic(api_key=config.anthropic_api_key)
-    prompt = (
-        "You are an experienced IELTS examiner. Grade the following "
-        f"Writing Task {task.get('task', 2)} response.\n\n"
-        f"PROMPT:\n{task['prompt']}\n\n"
-        f"CANDIDATE RESPONSE:\n{text}\n\n"
-        "Give: (1) an estimated band score 0-9 for each of the four criteria "
-        "(Task Achievement, Coherence & Cohesion, Lexical Resource, "
-        "Grammatical Range & Accuracy) and an overall band; (2) two concrete "
-        "strengths; (3) three specific, actionable improvements with examples "
-        "rewritten from the candidate's own text. Keep it under 300 words. "
-        "Use plain text, no markdown headers."
-    )
-    message = await client.messages.create(
-        model=config.anthropic_model,
-        max_tokens=1024,
-        messages=[{"role": "user", "content": prompt}],
-    )
-    parts = [block.text for block in message.content if getattr(block, "type", "") == "text"]
-    return "🤖 <b>AI examiner feedback</b>\n\n" + "\n".join(parts).strip()
+    result = await TutorAgent(config).evaluate("writing", task, text)
+    if result is None:
+        raise RuntimeError("the marking call did not return a result")
+    return result.as_html("🤖 <b>AI examiner feedback</b>")
+
+
+def _explain(exc: Exception) -> str:
+    """Short, actionable reason why the AI call failed."""
+    name = exc.__class__.__name__
+    detail = str(exc).strip() or "no details"
+    hints = {
+        "AuthenticationError": "check ANTHROPIC_API_KEY in .env (it must start with sk-ant-)",
+        "PermissionDeniedError": "the API key has no access to this model",
+        "NotFoundError": "check ANTHROPIC_MODEL in .env — that model id does not exist",
+        "RateLimitError": "rate limit reached, try again in a minute",
+        "APIConnectionError": "could not reach api.anthropic.com",
+    }
+    hint = hints.get(name)
+    message = f"{name}: {detail[:200]}"
+    if hint:
+        message += f" — {hint}"
+    return html.escape(message)
 
 
 async def evaluate_essay(text: str, task: dict, config: Config) -> str:
@@ -94,6 +101,8 @@ async def evaluate_essay(text: str, task: dict, config: Config) -> str:
         try:
             return await _ai_feedback(text, task, config)
         except Exception as exc:  # network/key errors → graceful fallback
+            # Log the full traceback so the operator can see what actually broke.
+            logger.warning("AI feedback failed, using rule-based fallback", exc_info=True)
             fallback = _heuristic_feedback(text, task)
-            return f"⚠️ AI feedback unavailable ({exc.__class__.__name__}).\n\n{fallback}"
+            return f"⚠️ AI feedback unavailable — {_explain(exc)}\n\n{fallback}"
     return await asyncio.to_thread(_heuristic_feedback, text, task)

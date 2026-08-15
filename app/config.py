@@ -19,11 +19,34 @@ class Config:
     db_path: Path
     anthropic_api_key: str | None
     anthropic_model: str
+    openrouter_api_key: str | None
+    openrouter_model: str
     telegram_proxy: str | None
 
     @property
+    def ai_provider(self) -> str | None:
+        """Which backend the agent should use, or None when it has no key.
+
+        OpenRouter wins when both are configured: setting it is the more
+        deliberate act, since the bot works with Anthropic out of the box.
+        """
+        if self.openrouter_api_key:
+            return "openrouter"
+        if self.anthropic_api_key:
+            return "anthropic"
+        return None
+
+    @property
     def ai_enabled(self) -> bool:
-        return bool(self.anthropic_api_key)
+        return self.ai_provider is not None
+
+    @property
+    def model(self) -> str:
+        return (
+            self.openrouter_model
+            if self.ai_provider == "openrouter"
+            else self.anthropic_model
+        )
 
 
 def load_config() -> Config:
@@ -42,5 +65,9 @@ def load_config() -> Config:
         db_path=db_path,
         anthropic_api_key=os.getenv("ANTHROPIC_API_KEY", "").strip() or None,
         anthropic_model=os.getenv("ANTHROPIC_MODEL", "claude-sonnet-5").strip(),
+        openrouter_api_key=os.getenv("OPENROUTER_API_KEY", "").strip() or None,
+        openrouter_model=os.getenv(
+            "OPENROUTER_MODEL", "nvidia/nemotron-3-super-120b-a12b:free"
+        ).strip(),
         telegram_proxy=os.getenv("TELEGRAM_PROXY", "").strip() or None,
     )

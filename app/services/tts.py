@@ -7,7 +7,10 @@ from __future__ import annotations
 
 import asyncio
 import hashlib
+import logging
 from pathlib import Path
+
+logger = logging.getLogger(__name__)
 
 _CACHE_DIR = Path("media/tts")
 
@@ -35,8 +38,12 @@ def _synthesize_sync(text: str) -> Path:
 async def synthesize(text: str) -> Path | None:
     """Return an mp3 Path for the text, or None if TTS is unavailable/failed."""
     if not _AVAILABLE:
+        logger.info("gTTS is not installed — Listening will send the transcript as text.")
         return None
     try:
         return await asyncio.to_thread(_synthesize_sync, text)
     except Exception:
+        # gTTS reaches translate.google.com, so this is usually a network
+        # problem. Log it: silently degrading to text hides a fixable cause.
+        logger.warning("Speech synthesis failed — falling back to text.", exc_info=True)
         return None
