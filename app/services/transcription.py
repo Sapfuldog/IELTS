@@ -68,6 +68,37 @@ class Transcript:
             notes.append("no long pauses")
         return notes
 
+    def delivery_evidence(self) -> str:
+        """What the audio shows about delivery, for the marker to weigh.
+
+        This is the only evidence about pronunciation the bot has, and it is
+        worth being exact about what it is. Whisper's confidence measures how
+        readily the speech was recognised — intelligibility, which is what the
+        Pronunciation descriptors turn on at the lower bands. It says nothing
+        about individual sounds or intonation, so the marker is told that too
+        rather than being left to assume it has more than it does.
+        """
+        clarity = (
+            "easily recognised throughout" if self.confidence > -0.35
+            else "mostly clear, some words hard to make out" if self.confidence > -0.6
+            else "frequently hard to make out"
+        )
+        pace = (
+            "very slow" if self.words_per_minute < 90
+            else "measured" if self.words_per_minute < 120
+            else "natural" if self.words_per_minute < 170
+            else "fast"
+        )
+        return (
+            f"Speech evidence from the recording (not a transcript of sounds): "
+            f"the recogniser found the speech {clarity}; pace was {pace} at "
+            f"{self.words_per_minute:.0f} words per minute over "
+            f"{self.duration:.0f} seconds; {self.long_pauses} hesitation "
+            f"pause(s) longer than {PAUSE_SECONDS:g}s"
+            + (f", the longest {self.longest_pause:.1f}s" if self.long_pauses else "")
+            + "."
+        )
+
     @property
     def uncertain(self) -> bool:
         """Whether the model itself found the audio hard to make out.

@@ -87,7 +87,7 @@ async def stop(call: CallbackQuery, state: FSMContext) -> None:
     await call.message.answer("⏹ Stopped. Back to the menu.", reply_markup=kb.main_menu())
 
 
-async def _transcribe_voice(message: Message, bot) -> str | None:
+async def _transcribe_voice(message: Message, bot) -> tuple[str, str] | None:
     """Turn a voice note into text, and show the learner what was heard.
 
     The transcript is always displayed. Speech recognition is least reliable
@@ -136,7 +136,8 @@ async def _transcribe_voice(message: Message, bot) -> str | None:
 
 
 async def _analyse(
-    message: Message, exercise: dict, question: str, answer: str, config: Config
+    message: Message, exercise: dict, question: str, answer: str,
+    config: Config, delivery: str | None = None,
 ) -> None:
     """Show what to improve in one answer. No band: see Evaluation.as_html."""
     agent = TutorAgent(config)
@@ -147,7 +148,7 @@ async def _analyse(
     # Only the question just asked goes in, so the advice is about this answer
     # rather than the set as a whole.
     task = {**exercise, "questions": [question]}
-    result = await agent.evaluate("speaking", task, answer)
+    result = await agent.evaluate("speaking", task, answer, delivery)
     if result is None:
         await notice.edit_text(
             "⚠️ <i>Could not analyse that answer — see the bot log for why.</i>"
@@ -163,6 +164,7 @@ async def _analyse(
 async def _band_for_set(
     message: Message, exercise: dict, answers: list[str], config: Config,
     db: Database | None = None, user_id: int | None = None,
+    delivery: list[str] | None = None,
 ) -> float | None:
     """One band for the whole set, judged on everything the learner said.
 
@@ -178,7 +180,15 @@ async def _band_for_set(
         f"Q: {q}\nA: {a}"
         for q, a in zip(exercise.get("questions", []), answers)
     )
-    result = await agent.evaluate("speaking", exercise, transcript)
+    # Only a set answered entirely by voice gets a pronunciation band:
+    # judging it from a mix of spoken and typed replies would be
+    # scoring the typed ones on evidence that does not exist for them.
+    evidence = (
+        "\n".join(delivery)
+        if delivery and len(delivery) == len(answers)
+        else None
+    )
+    result = await agent.evaluate("speaking", exercise, transcript, evidence)
     if result is None:
         return None
     for chunk in split_message(
@@ -208,11 +218,18 @@ async def receive_answer(
             message, exercise, exercise["questions"][idx], message.text, config
         )
     else:
-        spoken = await _transcribe_voice(message, bot)
-        if spoken:
+        heard = await _transcribe_voice(message, bot)
+        if heard:
+            spoken, delivery = heard
             given.append(spoken)
+            # Kept for the end-of-set band: pronunciation can only be judged
+            # from a recording, so a set answered by voice earns the fourth
+            # criterion and one answered by typing does not.
+            evidence = [*data.get("delivery", []), delivery]
+            await state.update_data(delivery=evidence)
             await _analyse(
-                message, exercise, exercise["questions"][idx], spoken, config
+                message, exercise, exercise["questions"][idx], spoken, config,
+                delivery,
             )
 
     if next_idx < len(exercise["questions"]):
@@ -221,8 +238,10 @@ async def receive_answer(
         return
 
     # Finished the set → one band over everything said, tips, and close out.
+    data = await state.get_data()
     band = await _band_for_set(
-        message, exercise, given, config, db, message.chat.id
+        message, exercise, given, config, db, message.chat.id,
+        data.get("delivery") or [],
     )
     # Each tip carries its Russian under a spoiler: advice a learner cannot
     # read is advice they cannot act on, but showing it unasked removes the

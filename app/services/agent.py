@@ -753,12 +753,23 @@ class TutorAgent:
     # --- Marking ----------------------------------------------------------
 
     async def evaluate(
-        self, section: str, task: dict, answer: str
+        self, section: str, task: dict, answer: str, delivery: str | None = None
     ) -> Evaluation | None:
-        """Mark a Writing or Speaking response against the band descriptors."""
+        """Mark a Writing or Speaking response against the band descriptors.
+
+        `delivery` carries measurements taken from a recording. Only when it is
+        present does Speaking get its fourth criterion: without audio there is
+        nothing to judge pronunciation from, and asking anyway produced a
+        confident number with nothing behind it.
+        """
         if not self.available:
             return None
-        criteria = _WRITING_CRITERIA if section == "writing" else _SPEAKING_CRITERIA
+        if section == "writing":
+            criteria = _WRITING_CRITERIA
+        elif delivery:
+            criteria = _SPEAKING_CRITERIA + ["Pronunciation"]
+        else:
+            criteria = _SPEAKING_CRITERIA
 
         if section == "writing":
             context = (
@@ -772,9 +783,18 @@ class TutorAgent:
             context = (
                 f"Speaking Part {task.get('part', 1)} — {task.get('topic', '')}\n"
                 f"QUESTIONS:\n{listed}\n\n"
-                "The candidate typed this answer rather than speaking, so judge "
-                "only what writing can show. Do not comment on pronunciation, "
-                "accent, intonation or hesitation.\n"
+                + (
+                    f"{delivery}\nJudge Pronunciation strictly on that "
+                    "evidence — how readily the speech was understood, its "
+                    "pace and its hesitation. You did not hear the recording, "
+                    "so say nothing about individual sounds, stress or "
+                    "intonation, and do not infer an accent.\n"
+                    if delivery else
+                    "The candidate typed this answer rather than speaking, so "
+                    "judge only what writing can show. Do not comment on "
+                    "pronunciation, accent, intonation or hesitation.\n"
+                )
+                +
                 "This is a practice sample, and Part 1 answers are short by "
                 "design. Judge the control of language shown, and do not mark "
                 "down for brevity the format itself asks for.\n"

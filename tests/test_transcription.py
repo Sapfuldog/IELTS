@@ -67,3 +67,70 @@ class TestHonesty:
     def test_pauses_are_reported_when_present(self):
         t = Transcript(text="x", duration=10, words=5, long_pauses=2, longest_pause=3.4)
         assert "2 pause(s)" in " ".join(t.observations())
+
+
+class TestDeliveryEvidence:
+    """What the marker is told about a recording it cannot hear."""
+
+    def clear(self):
+        return Transcript(text="x", duration=95, words=210, long_pauses=1,
+                          longest_pause=2.0, confidence=-0.25)
+
+    def unclear(self):
+        return Transcript(text="x", duration=60, words=70, long_pauses=6,
+                          longest_pause=5.0, confidence=-0.9)
+
+    def test_clarity_is_reported(self):
+        assert "easily recognised" in self.clear().delivery_evidence()
+        assert "hard to make out" in self.unclear().delivery_evidence()
+
+    def test_pace_is_reported(self):
+        assert "natural" in self.clear().delivery_evidence()
+        assert "very slow" in self.unclear().delivery_evidence()
+
+    def test_hesitation_is_reported(self):
+        assert "6 hesitation pause" in self.unclear().delivery_evidence()
+
+    def test_it_says_what_it_is_not(self):
+        """The marker never hears the audio, so it must not infer sounds."""
+        assert "not a transcript of sounds" in self.clear().delivery_evidence()
+
+
+class TestPronunciationCriterion:
+    """The fourth criterion exists only when there is a recording behind it."""
+
+    def _criteria(self, delivery):
+        from app.services.agent import _SPEAKING_CRITERIA
+
+        return _SPEAKING_CRITERIA + (["Pronunciation"] if delivery else [])
+
+    def test_a_typed_answer_is_marked_on_three(self):
+        assert "Pronunciation" not in self._criteria(None)
+
+    def test_a_spoken_answer_is_marked_on_four(self):
+        assert "Pronunciation" in self._criteria("evidence")
+
+    async def test_the_agent_asks_for_pronunciation_only_with_audio(self, agent_config):
+        from app.services.agent import TutorAgent
+
+        seen = {}
+
+        async def _ask(prompt, schema, max_tokens=4096):
+            seen["criteria"] = list(schema["properties"]["criteria"]["properties"])
+            seen["prompt"] = prompt
+            return {
+                "criteria": {c: 6.0 for c in seen["criteria"]},
+                "comment": "", "comment_ru": "", "strengths": [], "strengths_ru": [],
+                "improvements": [], "improvements_ru": [], "corrections": [],
+            }
+
+        agent = TutorAgent(agent_config)
+        agent._ask = _ask
+        task = {"part": 1, "questions": ["Q?"]}
+
+        await agent.evaluate("speaking", task, "answer")
+        assert "Pronunciation" not in seen["criteria"]
+
+        await agent.evaluate("speaking", task, "answer", "Speech evidence: clear.")
+        assert "Pronunciation" in seen["criteria"]
+        assert "say nothing about individual sounds" in seen["prompt"]
