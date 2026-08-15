@@ -26,7 +26,7 @@ from aiogram.types import CallbackQuery, Message
 from app import keyboards as kb
 from app.config import Config
 from app.db import Database
-from app.formatting import esc, split_message, spoiler
+from app.formatting import esc, multi_prompt, split_message, spoiler
 from app.services import banding, content, mistakes
 from app.services.agent import TutorAgent
 from app.services.evaluation import evaluate_essay
@@ -274,6 +274,8 @@ async def _ask_question(message: Message, state: FSMContext) -> None:
     keyboard = kb.answer_keyboard(q)
     if keyboard:
         await message.answer(header, reply_markup=keyboard)
+    elif q["type"] == "multi":
+        await message.answer(f"{header}\n\n{multi_prompt(q)}")
     else:
         await message.answer(header + "\n\n✏️ <i>Type your answer:</i>")
 
@@ -423,7 +425,8 @@ async def on_test_typed(
     data = await state.get_data()
     section = _STAGES[data["stage_index"]]
     q = _current_question(data, section)
-    if q["type"] != "gap":
+    # Both gap and multi are answered by typing; everything else has buttons.
+    if q["type"] not in ("gap", "multi"):
         await message.answer("Please tap one of the buttons above to answer.")
         return
     await _record_answer(message, state, config, db, message.text or "")

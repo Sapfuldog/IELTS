@@ -54,3 +54,24 @@ def split_message(text: str, limit: int = TELEGRAM_LIMIT) -> list[str]:
     if current:
         chunks.append(current)
     return chunks
+
+
+MULTI_LETTERS = "ABCDEFGH"
+
+
+def multi_prompt(question: dict) -> str:
+    """Lettered options plus the instruction, for a choose-several question.
+
+    The answer is typed, so the letters have to be on screen — without them
+    the learner has nothing to type.
+    """
+    wanted = len(question.get("answer") or [])
+    lines = [
+        f"{MULTI_LETTERS[i]}. {esc(option)}"
+        for i, option in enumerate(question.get("options", []))
+    ]
+    lines.append(
+        f"\n✏️ <i>Choose {wanted} letters and send them together, e.g. "
+        f"{MULTI_LETTERS[:wanted]}</i>"
+    )
+    return "\n".join(lines)

@@ -15,6 +15,7 @@ import re
 
 from app.services.grading import (
     CHOICE_LABELS,
+    MULTI_LETTERS,
     CHOICE_TYPES,
     QUESTION_TYPES,
     is_correct,
@@ -49,6 +50,8 @@ def check_key_against_explanation(question: dict) -> str | None:
     """
     options = question.get("options") or []
     answer = question.get("answer")
+    if question.get("type") != "mc":
+        return None
     if not isinstance(answer, int) or not 0 <= answer < len(options):
         return None
     explanation = _content_words(question.get("explanation", ""))
@@ -89,6 +92,21 @@ def validate_question(q: dict, where: str = "question") -> list[str]:
             problems.append(
                 f"{where}: answer index {q['answer']} out of range (0-{len(options) - 1})"
             )
+    elif qtype == "multi":
+        options = q.get("options")
+        if not isinstance(options, list) or len(options) < 3:
+            return problems + [f"{where}: multi-select needs at least 3 options"]
+        answer = q.get("answer")
+        if not isinstance(answer, list) or len(answer) < 2:
+            problems.append(f"{where}: multi-select answer must list 2+ indices")
+        elif len(set(answer)) != len(answer):
+            problems.append(f"{where}: the same option is listed twice")
+        elif not all(isinstance(i, int) and 0 <= i < len(options) for i in answer):
+            problems.append(f"{where}: an answer index is out of range")
+        elif len(answer) >= len(options):
+            # Selecting everything is not a question.
+            problems.append(f"{where}: the answer cannot be every option")
+
     elif qtype in CHOICE_TYPES:
         allowed = CHOICE_LABELS[qtype]
         if normalize_choice(str(q["answer"])) not in allowed:
@@ -106,7 +124,13 @@ def validate_question(q: dict, where: str = "question") -> list[str]:
     # The load-bearing check: whatever the question calls correct must actually
     # be graded correct. A model that writes a good passage but an off-by-one
     # answer index fails here and nowhere else.
-    if not problems and not is_correct(q, str(q["answer"])):
+    # Probe with what a learner would actually type: for multi that is the
+    # letters, not the repr of the index list.
+    if qtype == "multi":
+        probe = "".join(MULTI_LETTERS[i] for i in q["answer"] if i < len(MULTI_LETTERS))
+    else:
+        probe = str(q["answer"])
+    if not problems and not is_correct(q, probe):
         problems.append(f"{where}: the declared correct answer does not pass is_correct()")
 
     if not problems:

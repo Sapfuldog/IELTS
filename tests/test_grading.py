@@ -94,3 +94,37 @@ class TestGapNumbers:
 
     def test_wrong_number_fails(self):
         assert not is_correct({"type": "gap", "answer": "twenty-five"}, "24")
+
+
+class TestMultiSelect:
+    """'Choose TWO letters' — a set, order-independent, all or nothing."""
+
+    Q = {
+        "type": "multi",
+        "q": "Which TWO are mentioned?",
+        "options": ["Cost", "Speed", "Safety", "Comfort"],
+        "answer": [0, 2],
+        "explanation": "The passage names cost and safety.",
+    }
+
+    @pytest.mark.parametrize("given", ["AC", "ac", "A, C", "A C", "CA", "1,3", "1 3"])
+    def test_every_reasonable_way_of_writing_it(self, given):
+        assert is_correct(self.Q, given)
+
+    @pytest.mark.parametrize("given", ["A", "ABC", "AB", "", "XZ", "5,6"])
+    def test_partial_or_wrong_selections_fail(self, given):
+        """A real paper gives no credit for one of two right."""
+        assert not is_correct(self.Q, given)
+
+    def test_out_of_range_letters_are_rejected(self):
+        from app.services.grading import parse_multi
+
+        assert parse_multi("AZ", 4) is None
+
+    def test_nothing_selected_is_not_an_empty_match(self):
+        from app.services.grading import parse_multi
+
+        assert parse_multi("   ", 4) is None
+
+    def test_the_correct_answer_reads_as_letters_and_text(self):
+        assert correct_answer_text(self.Q) == "A. Cost + C. Safety"

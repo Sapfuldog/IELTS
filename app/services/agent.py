@@ -93,7 +93,23 @@ _GAP_QUESTION = {
     "additionalProperties": False,
 }
 
-_QUESTION = {"anyOf": [_MC_QUESTION, _CHOICE_QUESTION, _GAP_QUESTION]}
+_MULTI_QUESTION = {
+    "type": "object",
+    "properties": {
+        "type": {"enum": ["multi"]},
+        "q": {"type": "string"},
+        "options": {"type": "array", "items": {"type": "string"}},
+        # Same reasoning as mc: the exact texts, never letters or numbers.
+        "answer": {"type": "array", "items": {"type": "string"}},
+        "explanation": {"type": "string"},
+    },
+    "required": ["type", "q", "options", "answer", "explanation"],
+    "additionalProperties": False,
+}
+
+_QUESTION = {
+    "anyOf": [_MC_QUESTION, _CHOICE_QUESTION, _GAP_QUESTION, _MULTI_QUESTION]
+}
 
 
 def _quiz_schema(body_field: str) -> dict:
@@ -271,8 +287,20 @@ def _resolve_answer(question: dict) -> int | str:
     """
     answer = question.get("answer")
     options = question.get("options", [])
+
+    if question.get("type") == "multi":
+        # A list of option texts becomes a list of indices, same as mc.
+        if not isinstance(answer, list):
+            return answer
+        return [_resolve_one(str(item), options) for item in answer]
+
     if isinstance(answer, int):
         return answer  # already an index; validation checks the range
+    return _resolve_one(str(answer), options)
+
+
+def _resolve_one(answer: str, options: list) -> int | str:
+    """One option text (or bare letter) to its index, or the text unchanged."""
 
     wanted = _strip_label(str(answer)).casefold()
     for index, option in enumerate(options):
@@ -591,7 +619,9 @@ class TutorAgent:
         """
         for question in exercise.get("questions", []):
             # Speaking sets hold plain strings here, not question objects.
-            if not isinstance(question, dict) or question.get("type") != "mc":
+            if not isinstance(question, dict):
+                continue
+            if question.get("type") not in ("mc", "multi"):
                 continue
             question["options"] = [
                 _strip_label(option) for option in question.get("options", [])

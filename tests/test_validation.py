@@ -123,3 +123,34 @@ class TestWritingShape:
             "task": 3, "tips": ["t"],
         }
         assert any("must be 1 or 2" in p for p in validate_exercise("writing", ex))
+
+
+class TestMultiSelectShape:
+    BASE = {
+        "type": "multi", "q": "Which TWO?",
+        "options": ["a", "b", "c", "d"], "answer": [0, 2],
+        "explanation": "e",
+    }
+
+    def test_a_valid_multi_passes(self):
+        assert validate_question(self.BASE) == []
+
+    def test_one_answer_is_not_a_multi_select(self):
+        q = {**self.BASE, "answer": [1]}
+        assert any("2+ indices" in p for p in validate_question(q))
+
+    def test_a_repeated_option_is_rejected(self):
+        q = {**self.BASE, "answer": [1, 1]}
+        assert any("listed twice" in p for p in validate_question(q))
+
+    def test_an_out_of_range_index_is_rejected(self):
+        q = {**self.BASE, "answer": [0, 9]}
+        assert any("out of range" in p for p in validate_question(q))
+
+    def test_selecting_everything_is_not_a_question(self):
+        q = {**self.BASE, "answer": [0, 1, 2, 3]}
+        assert any("cannot be every option" in p for p in validate_question(q))
+
+    def test_too_few_options_is_rejected(self):
+        q = {**self.BASE, "options": ["a", "b"], "answer": [0, 1]}
+        assert any("at least 3 options" in p for p in validate_question(q))

@@ -12,8 +12,33 @@ Supported question types:
 """
 from __future__ import annotations
 
+import re
+
 CHOICE_TYPES = {"tf", "tfng", "ynng"}
-QUESTION_TYPES = {"mc", "gap"} | CHOICE_TYPES
+QUESTION_TYPES = {"mc", "gap", "multi"} | CHOICE_TYPES
+
+# Real papers ask for these by letter ("Choose TWO letters, A-E"), so the
+# answer is typed rather than tapped. A toggling keyboard would have to hold
+# a partial selection in the FSM, in both the practice flow and the test.
+MULTI_LETTERS = "ABCDEFGH"
+
+
+def parse_multi(given: str, option_count: int) -> set[int] | None:
+    """Read 'AC', 'a, c' or '1 3' as a set of option indices.
+
+    Returns None when nothing recognisable was selected, which the grader
+    treats as wrong rather than as an empty-and-therefore-matching answer.
+    """
+    picked: set[int] = set()
+    for token in re.findall(r"[A-Za-z]|\d+", str(given)):
+        if token.isdigit():
+            index = int(token) - 1  # learners count from 1
+        else:
+            index = MULTI_LETTERS.find(token.upper())
+        if not 0 <= index < option_count:
+            return None
+        picked.add(index)
+    return picked or None
 
 CHOICE_LABELS: dict[str, tuple[str, ...]] = {
     "tf": ("TRUE", "FALSE"),
@@ -124,6 +149,11 @@ def is_correct(question: dict, given: str) -> bool:
     if qtype == "mc":
         return given.isdigit() and int(given) == question["answer"]
 
+    if qtype == "multi":
+        # All or nothing: a real paper gives no credit for one of two right.
+        wanted = {int(i) for i in question["answer"]}
+        return parse_multi(given, len(question.get("options", []))) == wanted
+
     if qtype in CHOICE_TYPES:
         return normalize_choice(given) == normalize_choice(str(question["answer"]))
 
@@ -138,4 +168,11 @@ def is_correct(question: dict, given: str) -> bool:
 def correct_answer_text(question: dict) -> str:
     if question["type"] == "mc":
         return question["options"][question["answer"]]
+    if question["type"] == "multi":
+        options = question.get("options", [])
+        return " + ".join(
+            f"{MULTI_LETTERS[i]}. {options[i]}"
+            for i in sorted(question["answer"])
+            if i < len(options)
+        )
     return str(question["answer"])

@@ -17,7 +17,9 @@ from aiogram.types import BufferedInputFile, CallbackQuery, Message
 from app import keyboards as kb
 from app.config import Config
 from app.db import Database
-from app.formatting import esc, spoiler, split_message, translation_block
+from app.formatting import (
+    esc, multi_prompt, spoiler, split_message, translation_block,
+)
 from app.services import content, mistakes, tts
 from app.services.agent import TutorAgent
 from app.services.grading import correct_answer_text, is_correct
@@ -197,6 +199,8 @@ async def _send_question(message: Message, state: FSMContext) -> None:
         await message.answer(header, reply_markup=kb.tfng_options())
     elif q["type"] == "ynng":
         await message.answer(header, reply_markup=kb.ynng_options())
+    elif q["type"] == "multi":
+        await message.answer(f"{header}\n\n{multi_prompt(q)}")
     else:  # gap fill
         await message.answer(header + "\n\n✏️ <i>Type your answer:</i>")
 
@@ -276,7 +280,8 @@ async def on_typed_answer(message: Message, state: FSMContext, db: Database) -> 
     data = await state.get_data()
     exercise = content.get_exercise(data["section"], data["exercise_id"])
     q = exercise["questions"][data["q_index"]]
-    if q["type"] != "gap":
+    # Both gap and multi are answered by typing; everything else has buttons.
+    if q["type"] not in ("gap", "multi"):
         await message.answer("Please tap one of the buttons above to answer.")
         return
     await _grade(message, state, db, message.text or "")
