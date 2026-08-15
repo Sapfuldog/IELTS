@@ -210,7 +210,11 @@ _BRIEFS = {
         "'ynng' only for the writer's views. Every answer must be decidable "
         "from the passage alone. For multiple choice, 'answer' is the exact "
         "text of the correct option, copied verbatim from your own options "
-        "list — never a number or a letter."
+        "list — never a number or a letter.\n"
+        "Include one 'multi' question (choose TWO of 4-5 options; 'answer' "
+        "lists both correct option texts) and one 'gap' with a 'bank' of 4-6 "
+        "candidate words, one of which is the answer. Leave 'bank' empty on "
+        "any other gap question."
     ),
     "listening": (
         "Write one IELTS Listening practice exercise: a 150-250 word spoken "
