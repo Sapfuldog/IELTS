@@ -102,11 +102,16 @@ def _quiz_schema(body_field: str) -> dict:
         "properties": {
             "title": {"type": "string"},
             "level": {"enum": ["A2", "B1", "B2", "C1"]},
+            # Stored on the exercise so a test can assemble a spread of
+            # difficulty rather than drawing uniformly at random.
+            "target_band": {"enum": [5, 6, 7, 8]},
             body_field: {"type": "string"},
             "translation": {"type": "string"},
             "questions": {"type": "array", "items": _QUESTION},
         },
-        "required": ["title", "level", body_field, "translation", "questions"],
+        "required": [
+            "title", "level", "target_band", body_field, "translation", "questions",
+        ],
         "additionalProperties": False,
     }
 

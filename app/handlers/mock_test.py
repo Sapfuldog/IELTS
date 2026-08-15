@@ -155,6 +155,11 @@ def assemble_section(section: str, target: int = TARGET_QUESTIONS) -> list[dict]
     """
     pool = list(content.get_all(section))
     random.shuffle(pool)
+    # Easiest first, as a real paper does: Reading passages get harder across
+    # the three, and a candidate who meets the hardest text first loses time
+    # they would have banked on the easy one. Exercises with no stated band
+    # sit in the middle rather than being pushed to either end.
+    pool.sort(key=lambda e: e.get("target_band") or 6)
 
     chosen: list[dict] = []
     questions = 0

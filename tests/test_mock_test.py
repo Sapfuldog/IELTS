@@ -223,3 +223,32 @@ class TestTiming:
         await run_test(message, state, offline_config, database, answer_correctly=True)
         final = [m for m in message.sent if "Test complete" in m][0]
         assert "Total time:" in final
+
+
+class TestDifficultySpread:
+    """A paper builds up: the easy passage first, the hardest last."""
+
+    def test_sections_are_ordered_by_stated_band(self, monkeypatch):
+        pool = [
+            {"id": "hard", "target_band": 8, "questions": [{}]},
+            {"id": "easy", "target_band": 5, "questions": [{}]},
+            {"id": "mid", "target_band": 7, "questions": [{}]},
+        ]
+        monkeypatch.setattr(content, "get_all", lambda s: pool)
+        assert [e["id"] for e in mt.assemble_section("reading", target=3)] == [
+            "easy", "mid", "hard"
+        ]
+
+    def test_exercises_without_a_band_sit_in_the_middle(self, monkeypatch):
+        """Hand-written content predates the field and must not be exiled."""
+        pool = [
+            {"id": "hard", "target_band": 8, "questions": [{}]},
+            {"id": "unmarked", "questions": [{}]},
+            {"id": "easy", "target_band": 5, "questions": [{}]},
+        ]
+        monkeypatch.setattr(content, "get_all", lambda s: pool)
+        order = [e["id"] for e in mt.assemble_section("reading", target=3)]
+        assert order.index("easy") < order.index("unmarked") < order.index("hard")
+
+    def test_the_real_bank_still_assembles(self):
+        assert len(mt.assemble_section("reading")) > 1
