@@ -11,6 +11,7 @@ env/
 
 # Runtime data
 *.db
+bot.pid
 *.sqlite3
 data/
 media/tts/*.mp3

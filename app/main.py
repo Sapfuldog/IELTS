@@ -3,6 +3,10 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import os
+import subprocess
+import sys
+from pathlib import Path
 
 from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
@@ -54,8 +58,67 @@ async def _set_commands(bot: Bot) -> None:
     )
 
 
+class AlreadyRunning(RuntimeError):
+    """Another instance holds the lock."""
+
+
+def claim_single_instance(path: Path) -> Path:
+    """Refuse to start when another instance is already polling.
+
+    Two processes on one token both call getUpdates, and Telegram hands each
+    update to whichever asks first — so the learner talks to one of them at
+    random, quite possibly the one running older code. The symptom is "the bot
+    is broken", not "there are two of it", which is why this is worth a guard
+    rather than a note in the README.
+
+    A stale file from a killed process is reclaimed: only a live PID counts.
+    """
+    if path.exists():
+        try:
+            pid = int(path.read_text().strip())
+        except (ValueError, OSError):
+            pid = None
+        if pid and pid != os.getpid() and _is_running(pid):
+            raise AlreadyRunning(
+                f"another bot instance is already running (PID {pid}).\n"
+                "   Stop it first — two instances on one token fight over "
+                "updates, and which one answers is unpredictable."
+            )
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(str(os.getpid()), encoding="utf-8")
+    return path
+
+
+def _is_running(pid: int) -> bool:
+    """True if a process with this id exists. Errs towards 'yes'.
+
+    Wrongly believing a dead process is alive costs a puzzled restart;
+    wrongly believing a live one is dead brings back the bug this prevents.
+    """
+    if sys.platform == "win32":
+        result = subprocess.run(
+            ["tasklist", "/FI", f"PID eq {pid}", "/NH"],
+            capture_output=True, text=True, check=False,
+        )
+        return str(pid) in result.stdout
+    try:
+        os.kill(pid, 0)
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True
+    return True
+
+
 async def main() -> None:
     config = load_config()
+
+    lock = config.db_path.parent / "bot.pid"
+    try:
+        claim_single_instance(lock)
+    except AlreadyRunning as exc:
+        raise SystemExit(f"❌ {exc}") from None
 
     db = Database(config.db_path)
     await db.init()
@@ -105,6 +168,7 @@ async def main() -> None:
         await dp.start_polling(bot)
     finally:
         await bot.session.close()
+        lock.unlink(missing_ok=True)
 
 
 if __name__ == "__main__":
