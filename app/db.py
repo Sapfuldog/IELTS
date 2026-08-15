@@ -173,6 +173,18 @@ class Database:
             )
             await db.commit()
 
+    async def all_words(self, user_id: int) -> list[dict]:
+        """Every word the learner already holds, dismissed ones included.
+
+        A card they retired should not come back through the random draw.
+        """
+        async with aiosqlite.connect(self._path) as db:
+            db.row_factory = aiosqlite.Row
+            cursor = await db.execute(
+                "SELECT word, source FROM cards WHERE user_id = ?", (user_id,)
+            )
+            return [dict(row) for row in await cursor.fetchall()]
+
     async def dismiss_card(self, card_id: int) -> None:
         """Retire a card the learner says was a typo, not a gap in knowledge."""
         async with aiosqlite.connect(self._path) as db:

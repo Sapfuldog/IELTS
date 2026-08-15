@@ -150,3 +150,61 @@ class TestEmptyQueue:
         markup = kb.vocab_menu(0, content.get_all("vocabulary"), can_generate=False)
         labels = [b.text for row in markup.inline_keyboard for b in row]
         assert not any("new deck" in label for label in labels)
+
+
+class TestRandomDraw:
+    """Words drawn across every deck, not in the order one deck lists them."""
+
+    async def test_it_adds_words_the_learner_does_not_have(
+        self, database, state, offline_config
+    ):
+        message = FakeMessage()
+        await vocab.start_random(FakeCallback(message, "card:random"), state, database)
+        counts = await database.card_counts(1)
+        assert counts["total"] == vocab.RANDOM_BATCH
+        assert "Added" in message.joined()
+
+    async def test_it_draws_from_more_than_one_deck(
+        self, database, state, offline_config
+    ):
+        """Otherwise it is just the first deck under another name."""
+        message = FakeMessage()
+        await vocab.start_random(FakeCallback(message, "card:random"), state, database)
+        origins = {c["origin_id"] for c in await database.due_cards(1, limit=50)}
+        assert len(origins) > 1
+
+    async def test_it_never_re_adds_a_word_already_held(
+        self, database, state, deck
+    ):
+        message = FakeMessage()
+        await vocab.start_deck(
+            FakeCallback(message, f"pick:vocabulary:{deck['id']}"), state, database
+        )
+        before = {c["word"] for c in await database.due_cards(1, limit=100)}
+
+        await vocab.start_random(FakeCallback(message, "card:random"), state, database)
+        words = [c["word"] for c in await database.due_cards(1, limit=100)]
+        assert len(words) == len(set(words)), "a word must not arrive twice"
+        assert before <= set(words)
+
+    async def test_a_retired_word_does_not_come_back(self, database, state):
+        """Dismissing a card is a decision; the random draw must respect it."""
+        from app.services import content as content_service
+
+        word = content_service.get_all("vocabulary")[0]["cards"][0]["word"]
+        await database.add_card(1, word, source="deck")
+        card = (await database.due_cards(1))[0]
+        await database.dismiss_card(card["id"])
+
+        message = FakeMessage()
+        await vocab.start_random(FakeCallback(message, "card:random"), state, database)
+        drawn = {c["word"] for c in await database.due_cards(1, limit=100)}
+        assert word not in drawn
+
+    async def test_nothing_left_to_draw_is_reported_plainly(self, database, state):
+        message = FakeMessage()
+        for _ in range(20):
+            await vocab.start_random(
+                FakeCallback(message, "card:random"), state, database
+            )
+        assert "nothing new to draw" in message.joined()

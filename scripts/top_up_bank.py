@@ -42,7 +42,9 @@ MAX_CONSECUTIVE_FAILURES = 3
 
 
 def questions_in(section: str) -> int:
-    return sum(len(e.get("questions", [])) for e in content.get_all(section))
+    """How much a section holds: questions, or cards for vocabulary."""
+    key = "cards" if section == "vocabulary" else "questions"
+    return sum(len(e.get(key, [])) for e in content.get_all(section))
 
 
 async def top_up(agent: TutorAgent, section: str, target: int) -> bool:
@@ -73,8 +75,11 @@ async def top_up(agent: TutorAgent, section: str, target: int) -> bool:
 
         content.add_generated(section, exercise)
         failures = 0
+        key = "cards" if section == "vocabulary" else "questions"
+        added = len(exercise.get(key, []))
         have = questions_in(section)
-        print(f"ok — {exercise['title'][:45]!r} (+{len(exercise['questions'])}, now {have})")
+        name = exercise.get("title") or exercise.get("topic") or exercise["id"]
+        print(f"ok — {name[:45]!r} (+{added}, now {have})")
 
     reached = have >= target
     print(f"  {'reached' if reached else 'stopped at'} {have}/{target}")
@@ -83,20 +88,25 @@ async def top_up(agent: TutorAgent, section: str, target: int) -> bool:
 
 async def main() -> int:
     args = sys.argv[1:]
-    sections = [args[0]] if args else ["listening", "reading"]
-    target = int(args[1]) if len(args) > 1 else 40
+    sections = [args[0]] if args else ["listening", "reading", "vocabulary"]
+    default_target = {"vocabulary": 120}
+    target = int(args[1]) if len(args) > 1 else None
 
     agent = TutorAgent(load_config())
     if not agent.available:
         print("No API key configured — nothing to generate with.")
         return 1
 
-    results = [await top_up(agent, section, target) for section in sections]
+    results = [
+        await top_up(agent, section, target or default_target.get(section, 40))
+        for section in sections
+    ]
     print()
     for section in sections:
         total, generated = content.count(section)
-        print(f"{section:<10} {total} exercises ({generated} generated), "
-              f"{questions_in(section)} questions")
+        unit = "cards" if section == "vocabulary" else "questions"
+        print(f"{section:<11} {total} sets ({generated} generated), "
+              f"{questions_in(section)} {unit}")
     return 0 if all(results) else 1
 
 

@@ -12,6 +12,7 @@ being so.
 from __future__ import annotations
 
 import logging
+import random
 
 from aiogram import F, Router
 from aiogram.filters import Command, or_f
@@ -99,6 +100,52 @@ async def start_deck(call: CallbackQuery, state: FSMContext, db: Database) -> No
 @router.callback_query(F.data == "card:start")
 async def start_review(call: CallbackQuery, state: FSMContext, db: Database) -> None:
     await call.answer()
+    await _begin_session(call.message, state, db)
+
+
+RANDOM_BATCH = 10
+
+
+@router.callback_query(F.data == "card:random")
+async def start_random(call: CallbackQuery, state: FSMContext, db: Database) -> None:
+    """Pull words at random from every deck, ignoring which deck they came from.
+
+    Working through a deck teaches the deck's order as much as the words —
+    'the one after ubiquitous'. Drawing across all of them breaks that, and it
+    is also the only way to meet words from a deck never opened.
+    """
+    await call.answer()
+
+    known = {card["word"].casefold() for card in await db.all_words(call.message.chat.id)}
+    pool = [
+        (deck, card)
+        for deck in content.get_all("vocabulary")
+        for card in deck.get("cards", [])
+        if card["word"].casefold() not in known
+    ]
+    random.shuffle(pool)
+
+    added = 0
+    for deck, card in pool[:RANDOM_BATCH]:
+        added += await db.add_card(
+            call.message.chat.id,
+            card["word"],
+            source="deck",
+            origin_id=deck["id"],
+            definition=card.get("definition"),
+            example=card.get("example"),
+            translation=card.get("translation"),
+        )
+
+    if added:
+        await call.message.answer(
+            f"🎲 Added {added} word(s) drawn from across every deck."
+        )
+    else:
+        await call.message.answer(
+            "🎲 You already have every word in the decks — nothing new to draw.\n"
+            "<i>Use ✨ to have new ones written for you.</i>"
+        )
     await _begin_session(call.message, state, db)
 
 

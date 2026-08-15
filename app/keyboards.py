@@ -160,6 +160,7 @@ def vocab_menu(
     kb = InlineKeyboardBuilder()
     if due:
         kb.button(text=f"🔁 Review {due} card(s) due now", callback_data="card:start")
+    kb.button(text="🎲 Random words from all decks", callback_data="card:random")
     for deck in decks:
         kb.button(
             text=deck.get("topic") or deck["id"],
